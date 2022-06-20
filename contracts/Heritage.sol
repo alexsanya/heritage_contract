@@ -12,7 +12,8 @@ contract Heritage {
   address payable owner;
   uint public numberOfSuccessors;
   uint lastPingTime;
-  uint maxPeriodOfSilense;
+  uint public maxPeriodOfSilense;
+  uint totalVolume;
   uint32 successorsListVersion;
   mapping(bytes32 => Successor) public successors;
   mapping(address => bool) public potentialSuccessors;
@@ -20,13 +21,18 @@ contract Heritage {
   event Deposit(uint amount);
   event Withdrowal(uint amount);
   event SetSuccessors();
+  event SuccessorClaimingShare(address successor, uint share);
+  event ReleasingFunds(address successor, uint amount);
+  event FundsTransfered(address successor, uint amount);
+
 
   constructor() {
     owner = payable(msg.sender);
+    totalVolume = address(this).balance;
     numberOfSuccessors = 0;
     successorsListVersion = 0;
     lastPingTime = block.timestamp;
-    maxPeriodOfSilense = 15 seconds;
+    maxPeriodOfSilense = 1 weeks;
   }
 
   modifier onlyOwner {
@@ -34,14 +40,23 @@ contract Heritage {
     _;
   }
 
-  function deposit() public payable {
+  modifier updateVolume {
+    _;
+    totalVolume = address(this).balance;
+  }
+
+  function deposit() public payable onlyOwner updateVolume {
     require(msg.sender == owner);
     emit Deposit(msg.value);
   }
 
-  function withdraw(uint amount) public onlyOwner {
+  function withdraw(uint amount) public onlyOwner updateVolume {
     owner.transfer(amount);
     emit Withdrowal(amount);
+  }
+
+  function updateMaxPeriodOfSilence(uint holdingPeriod) public onlyOwner {
+    maxPeriodOfSilense = holdingPeriod;
   }
 
   function setSuccessors(Successor[] calldata newSuccessors) public onlyOwner {
@@ -71,11 +86,19 @@ contract Heritage {
     lastPingTime = block.timestamp;
   }
 
+  function getCountdownValue() public onlyOwner view returns (uint) {
+    return lastPingTime;
+  }
+
   function claimHeritage() public {
     bytes32 key = keccak256(abi.encodePacked(successorsListVersion, msg.sender));
     require(successors[key].share > 0);
+    emit SuccessorClaimingShare(msg.sender, successors[key].share);
     require((lastPingTime + maxPeriodOfSilense) < block.timestamp);
-    payable(msg.sender).transfer(address(this).balance / 100 * successors[key].share);
+    uint amount = totalVolume / 100 * successors[key].share;
+    emit ReleasingFunds(msg.sender, amount);
+    payable(msg.sender).transfer(amount);
+    emit FundsTransfered(msg.sender, amount);
     delete successors[key];
   }
 

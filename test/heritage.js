@@ -1,4 +1,6 @@
+const BigNumber = require("bignumber.js");
 const Heritage = artifacts.require("Heritage");
+const helper = require('./utils');
 
 /*
  * uncomment accounts to access the test accounts made available by the
@@ -8,7 +10,9 @@ const Heritage = artifacts.require("Heritage");
 contract("Heritage", (accounts) => {
   let heritage;
 
-  const getBallance = () => web3.eth.getBalance(heritage.address);
+  const getContractBalance = () => web3.eth.getBalance(heritage.address);
+
+  const SEVEN_DAYS = 60*60*24*7;
 
   beforeEach(async () => {
     heritage = await Heritage.new();
@@ -16,15 +20,15 @@ contract("Heritage", (accounts) => {
 
   it("should let owner to make deposit", async () => {
     await heritage.deposit({ from: accounts[0], value: "1000" });
-    const ballance = await getBallance();//web3.eth.getBalance(heritage.address);
-    assert.equal(ballance, "1000")
+    const balance = await getContractBalance();
+    assert.equal(balance, "1000")
   })
 
   it("should prevent anyone other than owner from making deposit", async () => {
     try {
       await heritage.deposit({ from: accounts[1], value: "1000" });
     } catch (err) {
-      assert.equal(await getBallance(), "0");
+      assert.equal(await getContractBalance(), "0");
       return;
     }
     assert(false);
@@ -174,5 +178,98 @@ contract("Heritage", (accounts) => {
     }
     assert(false);
   })
+
+  it("should let owner to reset timer", async () => {
+    await heritage.resetCountdownTimer();
+    const lastBlockTimestamp = (await web3.eth.getBlock('latest')).timestamp;
+    const countdownValue = await heritage.getCountdownValue();
+    assert.equal(lastBlockTimestamp, countdownValue.toString());
+  })
+
+  it("should not let any other account to reset timer", async () => {
+    try {
+      await heritage.resetCountdownTimer({ from: accounts[1] });
+    } catch (error) {
+      assert(true);
+      return;
+    }
+    assert(false);
+  })
+
+  describe("Withdrawal of shares" , () => {
+
+    let snapshotId;
+
+    before(async () => {
+      snapshotId = await helper.takeSnapshot();
+    })
+
+    beforeEach(async () => {
+      const successors = [
+        {
+          name: "Alex",
+          share: "70",
+          wallet: accounts[1],
+          maxPerMonth: "1000000"
+        },
+        {
+          name: "Bob",
+          share: "30",
+          wallet: accounts[2],
+          maxPerMonth: "1000000"
+        }
+      ];
+
+      await helper.revertToSnapShot(snapshotId);
+
+      await heritage.registerSuccessorApplicant({ from: accounts[1] });
+      await heritage.registerSuccessorApplicant({ from: accounts[2] });
+      await heritage.setSuccessors(successors);
+      await heritage.deposit({ value: web3.utils.toWei("10", "ether") });
+      await heritage.updateMaxPeriodOfSilence(SEVEN_DAYS);
+    });
+
+    it("should let a successor to claim his share after deadline have past", async () => {
+      await helper.advanceTimeAndBlock(SEVEN_DAYS);
+      await (async () => { //Alex claims share
+        const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[1]));
+        const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
+        const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[1]));
+        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(receipt.effectiveGasPrice);
+        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("7", "ether")).toString());
+      })()
+      await (async () => { //Bob claims share
+        const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[2]));
+        const { receipt } = await heritage.claimHeritage({ from: accounts[2] });
+        const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[2]));
+        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(receipt.effectiveGasPrice);
+        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("3", "ether")).toString());
+      })()
+
+    })
+
+    it("should prevent successor from claiming his share if deadline haven't passed", async () => {
+      await helper.advanceTimeAndBlock(Math.round(SEVEN_DAYS / 2));
+      try {
+        await heritage.claimHeritage({ from: accounts[1] });
+      } catch (error) {
+        assert(true);
+        return;
+      }
+      assert(false);
+    })
+
+    it("should prevent non-successor from claiming the share after deadline have past", async () => {
+      await helper.advanceTimeAndBlock(Math.round(SEVEN_DAYS));
+      try {
+        await heritage.claimHeritage({ from: accounts[3] });
+      } catch (error) {
+        assert(true);
+        return;
+      }
+      assert(false);
+    })
+
+  });
 
 });
