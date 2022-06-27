@@ -46,7 +46,6 @@ contract Heritage {
   }
 
   function deposit() public payable onlyOwner updateVolume {
-    require(msg.sender == owner);
     emit Deposit(msg.value);
   }
 
