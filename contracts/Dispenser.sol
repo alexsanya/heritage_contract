@@ -1,6 +1,6 @@
 contract Dispenser {
   uint maxValue;
-  uint balance;
+  uint public balance;
   address owner;
   address recipient;
   uint lastWithdrawalTime;
@@ -18,16 +18,15 @@ contract Dispenser {
     balance = 0;
   }
 
-  function deposit() public payable onlyOwner {
+  fallback() external payable onlyOwner {
     balance += msg.value;
   }
 
-  function withdraw() public {
-    require(msg.sender == recipient);
+  function withdraw() public onlyOwner {
     require(address(this).balance > 0);
     require(block.timestamp > lastWithdrawalTime + 30 days);
     uint value = maxValue < balance ? maxValue : balance;
-    payable(msg.sender).transfer(value);
+    payable(recipient).transfer(value);
     lastWithdrawalTime = block.timestamp;
     balance -= value;
   }
