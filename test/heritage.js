@@ -14,6 +14,8 @@ contract("Heritage", (accounts) => {
 
   const SEVEN_DAYS = 60*60*24*7;
 
+  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
   beforeEach(async () => {
     heritage = await Heritage.new();
   });
@@ -46,6 +48,8 @@ contract("Heritage", (accounts) => {
         name: "Alex",
         share: "100",
         wallet: accounts[1],
+        dispenser: ZERO_ADDRESS,
+        fundsBeenReleased: false,
         maxPerMonth: "1000000"
       }
     ];
@@ -62,6 +66,8 @@ contract("Heritage", (accounts) => {
         name: "Alex",
         share: "100",
         wallet: accounts[1],
+        dispenser: ZERO_ADDRESS,
+        fundsBeenReleased: false,
         maxPerMonth: "1000000"
       }
     ];
@@ -71,6 +77,8 @@ contract("Heritage", (accounts) => {
         name: "Bob",
         share: "100",
         wallet: accounts[2],
+        dispenser: ZERO_ADDRESS,
+        fundsBeenReleased: false,
         maxPerMonth: "1000000"
       }
     ]
@@ -95,6 +103,8 @@ contract("Heritage", (accounts) => {
         name: "Alex",
         share: "100",
         wallet: accounts[1].address,
+        dispenser: ZERO_ADDRESS,
+        fundsBeenReleased: false,
         maxPerMonth: "1000000"
       }
     ];
@@ -115,6 +125,8 @@ contract("Heritage", (accounts) => {
         name: "Alex",
         share: "100",
         wallet: "0x9Fe0Ffc3070f7112a745A7D9250b8580a7cAE0eE",
+        dispenser: ZERO_ADDRESS,
+        fundsBeenReleased: false,
         maxPerMonth: "1000000"
       }
     ];
@@ -134,12 +146,16 @@ contract("Heritage", (accounts) => {
         name: "Alex",
         share: "50",
         wallet: accounts[1],
+        dispenser: ZERO_ADDRESS,
+        fundsBeenReleased: false,
         maxPerMonth: "1000000"
       },
       {
         name: "Bob",
         share: "50",
         wallet: accounts[2],
+        dispenser: ZERO_ADDRESS,
+        fundsBeenReleased: false,
         maxPerMonth: "1000000"
       }
 
@@ -157,12 +173,16 @@ contract("Heritage", (accounts) => {
         name: "Alex",
         share: "50",
         wallet: accounts[1],
+        dispenser: ZERO_ADDRESS,
+        fundsBeenReleased: false,
         maxPerMonth: "1000000"
       },
       {
         name: "Bob",
         share: "20",
         wallet: accounts[2],
+        dispenser: ZERO_ADDRESS,
+        fundsBeenReleased: false,
         maxPerMonth: "1000000"
       }
 
@@ -210,13 +230,17 @@ contract("Heritage", (accounts) => {
           name: "Alex",
           share: "70",
           wallet: accounts[1],
-          maxPerMonth: "1000000"
+          dispenser: ZERO_ADDRESS,
+          fundsBeenReleased: false,
+          maxPerMonth: web3.utils.toWei("2", "ether") 
         },
         {
           name: "Bob",
           share: "30",
           wallet: accounts[2],
-          maxPerMonth: "1000000"
+          dispenser: ZERO_ADDRESS,
+          fundsBeenReleased: false,
+          maxPerMonth: web3.utils.toWei("10", "ether") 
         }
       ];
 
@@ -236,7 +260,7 @@ contract("Heritage", (accounts) => {
         const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
         const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[1]));
         const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(receipt.effectiveGasPrice);
-        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("7", "ether")).toString());
+        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("2", "ether")).toString());
       })()
       await (async () => { //Bob claims share
         const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[2]));
@@ -246,7 +270,31 @@ contract("Heritage", (accounts) => {
         assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("3", "ether")).toString());
       })()
 
+    });
+
+
+    it("should let a successor to claim his share monthly", async () => {
+      const ONE_MONTH_AND_ONE_DAY = 3600*24*31;
+
+      await helper.advanceTimeAndBlock(SEVEN_DAYS);
+      await (async () => { //Alex claims share
+        const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[1]));
+        const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
+        const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[1]));
+        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(receipt.effectiveGasPrice);
+        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("2", "ether")).toString());
+      })()
+      await helper.advanceTimeAndBlock(ONE_MONTH_AND_ONE_DAY);
+      await (async () => { //Alex claims share again
+        const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[1]));
+        const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
+        const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[1]));
+        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(receipt.effectiveGasPrice);
+        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("2", "ether")).toString());
+      })()
+
     })
+
 
     it("should prevent successor from claiming his share if deadline haven't passed", async () => {
       await helper.advanceTimeAndBlock(Math.round(SEVEN_DAYS / 2));

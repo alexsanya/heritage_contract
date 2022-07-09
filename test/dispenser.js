@@ -2,7 +2,7 @@ const BigNumber = require("bignumber.js");
 const helper = require('./utils');
 const Dispenser = artifacts.require("Dispenser");
 
-contract.only("Dispenser", (accounts) => {
+contract("Dispenser", (accounts) => {
   let dispenser;
   
   const getContractBalance = () => web3.eth.getBalance(dispenser.address);

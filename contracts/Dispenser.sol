@@ -5,6 +5,9 @@ contract Dispenser {
   address recipient;
   uint lastWithdrawalTime;
 
+  event FundsSentToRecipient(address wallet, uint value);
+  event FundsReceived(uint value);
+
   modifier onlyOwner {
     require(msg.sender == owner);
     _;
@@ -18,7 +21,8 @@ contract Dispenser {
     balance = 0;
   }
 
-  fallback() external payable onlyOwner {
+  receive() external payable onlyOwner {
+    emit FundsReceived(msg.value);
     balance += msg.value;
   }
 
@@ -26,7 +30,9 @@ contract Dispenser {
     require(address(this).balance > 0);
     require(block.timestamp > lastWithdrawalTime + 30 days);
     uint value = maxValue < balance ? maxValue : balance;
-    payable(recipient).transfer(value);
+    bool sent = payable(recipient).send(value);
+    emit FundsSentToRecipient(recipient, value);
+    require(sent, "Failed to send Ether");
     lastWithdrawalTime = block.timestamp;
     balance -= value;
   }

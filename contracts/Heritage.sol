@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.4 <0.9.0;
 
+import "./Dispenser.sol";
+
 struct Successor {
   string name;
   uint share;
   address wallet;
+  Dispenser dispenser;
   uint maxPerMonth;
+  bool fundsBeenReleased;
 }
 
 contract Heritage {
@@ -22,8 +26,9 @@ contract Heritage {
   event Withdrowal(uint amount);
   event SetSuccessors();
   event SuccessorClaimingShare(address successor, uint share);
-  event ReleasingFunds(address successor, uint amount);
+  event ReleasingFunds(address dispenser, uint amount, uint balance);
   event FundsTransfered(address successor, uint amount);
+  event DelegateCallToDispenser();
 
 
   constructor() {
@@ -66,6 +71,7 @@ contract Heritage {
       total += newSuccessors[i].share;
       bytes32 key = keccak256(abi.encodePacked(successorsListVersion, newSuccessors[i].wallet));
       successors[key] = newSuccessors[i];
+      successors[key].dispenser = new Dispenser(newSuccessors[i].maxPerMonth, newSuccessors[i].wallet);
       numberOfSuccessors += 1;
     }
     require(total == 100, "sum of shares should be equal to 100");
@@ -93,12 +99,20 @@ contract Heritage {
     bytes32 key = keccak256(abi.encodePacked(successorsListVersion, msg.sender));
     require(successors[key].share > 0);
     emit SuccessorClaimingShare(msg.sender, successors[key].share);
+    address payable dispenserAddress = payable(successors[key].dispenser);
+    Dispenser dispenser = Dispenser(dispenserAddress);
+    if (successors[key].fundsBeenReleased) {
+      emit DelegateCallToDispenser();
+      dispenser.withdraw();
+      return;
+    }
     require((lastPingTime + maxPeriodOfSilense) < block.timestamp);
     uint amount = totalVolume / 100 * successors[key].share;
-    emit ReleasingFunds(msg.sender, amount);
-    payable(msg.sender).transfer(amount);
-    emit FundsTransfered(msg.sender, amount);
-    delete successors[key];
+    emit ReleasingFunds(dispenserAddress, amount, address(this).balance);
+    dispenserAddress.call{value: amount}("");
+    successors[key].fundsBeenReleased = true;
+    emit FundsTransfered(dispenserAddress, amount);
+    dispenser.withdraw();
   }
 
 }
