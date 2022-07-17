@@ -109,7 +109,8 @@ contract Heritage {
     require((lastPingTime + maxPeriodOfSilense) < block.timestamp);
     uint amount = totalVolume / 100 * successors[key].share;
     emit ReleasingFunds(dispenserAddress, amount, address(this).balance);
-    dispenserAddress.call{value: amount}("");
+    (bool sent, bytes memory data) = dispenserAddress.call{value: amount}("");
+    require(sent, "Failed to send Ether");
     successors[key].fundsBeenReleased = true;
     emit FundsTransfered(dispenserAddress, amount);
     dispenser.withdraw();

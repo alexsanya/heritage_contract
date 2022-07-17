@@ -219,12 +219,14 @@ contract("Heritage", (accounts) => {
   describe("Withdrawal of shares" , () => {
 
     let snapshotId;
+    let gasPrice;
 
     before(async () => {
       snapshotId = await helper.takeSnapshot();
     })
 
     beforeEach(async () => {
+      gasPrice = await web3.eth.getGasPrice();
       const successors = [
         {
           name: "Alex",
@@ -259,15 +261,16 @@ contract("Heritage", (accounts) => {
         const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[1]));
         const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
         const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[1]));
-        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(receipt.effectiveGasPrice);
+        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(gasPrice);
+
         assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("2", "ether")).toString());
       })()
       await (async () => { //Bob claims share
         const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[2]));
         const { receipt } = await heritage.claimHeritage({ from: accounts[2] });
         const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[2]));
-        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(receipt.effectiveGasPrice);
-        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("3", "ether")).toString());
+        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(gasPrice);
+        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(new BigNumber(web3.utils.toWei("3", "ether"))).toString());
       })()
 
     });
@@ -281,7 +284,7 @@ contract("Heritage", (accounts) => {
         const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[1]));
         const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
         const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[1]));
-        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(receipt.effectiveGasPrice);
+        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(gasPrice);
         assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("2", "ether")).toString());
       })()
       await helper.advanceTimeAndBlock(ONE_MONTH_AND_ONE_DAY);
@@ -289,7 +292,7 @@ contract("Heritage", (accounts) => {
         const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[1]));
         const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
         const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[1]));
-        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(receipt.effectiveGasPrice);
+        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(gasPrice);
         assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("2", "ether")).toString());
       })()
 
