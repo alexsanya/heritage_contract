@@ -1,5 +1,6 @@
 const BigNumber = require("bignumber.js");
 const Heritage = artifacts.require("Heritage");
+const TestToken = artifacts.require("TestToken");
 const helper = require('./utils');
 
 /*
@@ -9,6 +10,7 @@ const helper = require('./utils');
  */
 contract("Heritage", (accounts) => {
   let heritage;
+  let token;
 
   const getContractBalance = () => web3.eth.getBalance(heritage.address);
 
@@ -17,10 +19,36 @@ contract("Heritage", (accounts) => {
   const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
   beforeEach(async () => {
-    heritage = await Heritage.new();
+    const SECONDS_IN_WEEK = 7*24*3600;
+    token = await TestToken.new("10000", { from: accounts[1] });
+    heritage = await Heritage.new(SECONDS_IN_WEEK, token.address);
   });
 
-  it("should let owner to make deposit", async () => {
+  it("should let owner to withdraw tokens", async () => {
+    await token.transfer(accounts[0], "1000", { from: accounts[1] });
+    await token.approve(heritage.address, 1000);
+    await heritage.depositTokens("1000");
+    await heritage.withdrawTokens("1000");
+    const tokenBalance = await token.balanceOf(accounts[0]);
+    assert.equal(tokenBalance.toString(), "1000");
+  });
+
+  it("should not let anyone other than owner to withdraw tokens", async () => {
+    await token.transfer(heritage.address, "1000", { from: accounts[1] });
+    try {
+      await heritage.withdrawTokens("1000", { from: accounts[2] });
+    } catch (err) {
+      const tokenBalance = await token.balanceOf(accounts[2]);
+      assert.equal(tokenBalance.toString(), "0");
+      return;
+    }
+
+    assert(false);
+  });
+
+
+
+  it("should let owner to make eth deposit", async () => {
     await heritage.deposit({ from: accounts[0], value: "1000" });
     const balance = await getContractBalance();
     assert.equal(balance, "1000")
@@ -219,14 +247,12 @@ contract("Heritage", (accounts) => {
   describe("Withdrawal of shares" , () => {
 
     let snapshotId;
-    let gasPrice;
 
     before(async () => {
       snapshotId = await helper.takeSnapshot();
     })
 
     beforeEach(async () => {
-      gasPrice = await web3.eth.getGasPrice();
       const successors = [
         {
           name: "Alex",
@@ -234,7 +260,7 @@ contract("Heritage", (accounts) => {
           wallet: accounts[1],
           dispenser: ZERO_ADDRESS,
           fundsBeenReleased: false,
-          maxPerMonth: web3.utils.toWei("2", "ether") 
+          maxPerMonth: 2
         },
         {
           name: "Bob",
@@ -242,7 +268,7 @@ contract("Heritage", (accounts) => {
           wallet: accounts[2],
           dispenser: ZERO_ADDRESS,
           fundsBeenReleased: false,
-          maxPerMonth: web3.utils.toWei("10", "ether") 
+          maxPerMonth: 10
         }
       ];
 
@@ -251,6 +277,11 @@ contract("Heritage", (accounts) => {
       await heritage.registerSuccessorApplicant({ from: accounts[1] });
       await heritage.registerSuccessorApplicant({ from: accounts[2] });
       await heritage.setSuccessors(successors);
+
+      await token.transfer(accounts[0], "100", { from: accounts[1] });
+      await token.approve(heritage.address, "100");
+      await heritage.depositTokens("100")
+
       await heritage.deposit({ value: web3.utils.toWei("10", "ether") });
       await heritage.updateMaxPeriodOfSilence(SEVEN_DAYS);
     });
@@ -258,19 +289,17 @@ contract("Heritage", (accounts) => {
     it("should let a successor to claim his share after deadline have past", async () => {
       await helper.advanceTimeAndBlock(SEVEN_DAYS);
       await (async () => { //Alex claims share
-        const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[1]));
+        const balanceBefore = await token.balanceOf(accounts[1]);
         const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
-        const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[1]));
-        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(gasPrice);
+        const balanceAfter = await token.balanceOf(accounts[1]);
 
-        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("2", "ether")).toString());
+        assert.equal(balanceAfter.toNumber(), balanceBefore.toNumber() + 2);
       })()
       await (async () => { //Bob claims share
-        const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[2]));
+        const balanceBefore = await token.balanceOf(accounts[2]);
         const { receipt } = await heritage.claimHeritage({ from: accounts[2] });
-        const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[2]));
-        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(gasPrice);
-        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(new BigNumber(web3.utils.toWei("3", "ether"))).toString());
+        const balanceAfter = await token.balanceOf(accounts[2]);
+        assert.equal(balanceAfter.toNumber(), balanceBefore.toNumber() + 10);
       })()
 
     });
@@ -281,19 +310,17 @@ contract("Heritage", (accounts) => {
 
       await helper.advanceTimeAndBlock(SEVEN_DAYS);
       await (async () => { //Alex claims share
-        const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[1]));
+        const balanceBefore = await token.balanceOf(accounts[1]);
         const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
-        const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[1]));
-        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(gasPrice);
-        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("2", "ether")).toString());
+        const balanceAfter = await token.balanceOf(accounts[1]);
+        assert.equal(balanceAfter.toNumber(), balanceBefore.toNumber() + 2);
       })()
       await helper.advanceTimeAndBlock(ONE_MONTH_AND_ONE_DAY);
       await (async () => { //Alex claims share again
-        const balanceBefore = BigNumber(await web3.eth.getBalance(accounts[1]));
+        const balanceBefore = await token.balanceOf(accounts[1]);
         const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
-        const balanceAfter = BigNumber(await web3.eth.getBalance(accounts[1]));
-        const gasUsed = BigNumber(receipt.gasUsed).multipliedBy(gasPrice);
-        assert.equal(balanceAfter.toString(), balanceBefore.minus(gasUsed).plus(web3.utils.toWei("2", "ether")).toString());
+        const balanceAfter = await token.balanceOf(accounts[1]);
+        assert.equal(balanceAfter.toNumber(), balanceBefore.toNumber() + 2);
       })()
 
     })

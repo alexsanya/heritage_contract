@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.4 <0.9.0;
 
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./Dispenser.sol";
 
 struct Successor {
@@ -14,6 +15,7 @@ struct Successor {
 
 contract Heritage {
   address payable owner;
+  IERC20 token;
   uint public numberOfSuccessors;
   uint lastPingTime;
   uint public maxPeriodOfSilense;
@@ -24,20 +26,21 @@ contract Heritage {
 
   event Deposit(uint amount);
   event Withdrowal(uint amount);
+  event TokenDeposit(uint amount);
+  event TokenWithdrowal(uint amount);
   event SetSuccessors();
   event SuccessorClaimingShare(address successor, uint share);
   event ReleasingFunds(address dispenser, uint amount, uint balance);
   event FundsTransfered(address successor, uint amount);
   event DelegateCallToDispenser();
 
-
-  constructor() {
+  constructor(uint unlockTimeline, IERC20 tokenAddress) {
     owner = payable(msg.sender);
-    totalVolume = address(this).balance;
+    token = tokenAddress;
     numberOfSuccessors = 0;
     successorsListVersion = 0;
     lastPingTime = block.timestamp;
-    maxPeriodOfSilense = 1 weeks;
+    maxPeriodOfSilense = unlockTimeline;
   }
 
   modifier onlyOwner {
@@ -45,19 +48,34 @@ contract Heritage {
     _;
   }
 
-  modifier updateVolume {
-    _;
-    totalVolume = address(this).balance;
-  }
-
-  function deposit() public payable onlyOwner updateVolume {
+  function deposit() public payable onlyOwner {
     emit Deposit(msg.value);
   }
 
-  function withdraw(uint amount) public onlyOwner updateVolume {
-    owner.transfer(amount);
+  function withdraw(uint amount) public onlyOwner {
+    bool sent = owner.send(amount);
+    require(sent, "Failed to sent tokens");
     emit Withdrowal(amount);
   }
+
+  function depositTokens(uint amount) public onlyOwner {
+    uint256 erc20balance = token.balanceOf(owner);
+    require(amount <= erc20balance, "Insufficient balance");
+    bool sent = token.transferFrom(owner, address(this), amount);
+    require(sent, "Failed to send tokens");
+    totalVolume += amount;
+    emit TokenDeposit(amount);
+  }
+
+  function withdrawTokens(uint amount) public onlyOwner {
+    uint256 erc20balance = token.balanceOf(address(this));
+    require(amount <= erc20balance, "Insufficient balance");
+    bool sent = token.transfer(owner, amount);
+    require(sent, "Failed to sent tokens");
+    totalVolume -= amount;
+    emit TokenWithdrowal(amount);
+  }
+
 
   function updateMaxPeriodOfSilence(uint holdingPeriod) public onlyOwner {
     maxPeriodOfSilense = holdingPeriod;
@@ -71,7 +89,7 @@ contract Heritage {
       total += newSuccessors[i].share;
       bytes32 key = keccak256(abi.encodePacked(successorsListVersion, newSuccessors[i].wallet));
       successors[key] = newSuccessors[i];
-      successors[key].dispenser = new Dispenser(newSuccessors[i].maxPerMonth, newSuccessors[i].wallet);
+      successors[key].dispenser = new Dispenser(token, newSuccessors[i].maxPerMonth, newSuccessors[i].wallet);
       numberOfSuccessors += 1;
     }
     require(total == 100, "sum of shares should be equal to 100");
@@ -99,8 +117,9 @@ contract Heritage {
     bytes32 key = keccak256(abi.encodePacked(successorsListVersion, msg.sender));
     require(successors[key].share > 0);
     emit SuccessorClaimingShare(msg.sender, successors[key].share);
-    address payable dispenserAddress = payable(successors[key].dispenser);
-    Dispenser dispenser = Dispenser(dispenserAddress);
+    //address dispenserAddress = successors[key].dispenser;
+    Dispenser dispenser = successors[key].dispenser;//Dispenser(dispenserAddress);
+    address dispenserAddress = address(dispenser);
     if (successors[key].fundsBeenReleased) {
       emit DelegateCallToDispenser();
       dispenser.withdraw();
@@ -109,8 +128,8 @@ contract Heritage {
     require((lastPingTime + maxPeriodOfSilense) < block.timestamp);
     uint amount = totalVolume / 100 * successors[key].share;
     emit ReleasingFunds(dispenserAddress, amount, address(this).balance);
-    (bool sent, bytes memory data) = dispenserAddress.call{value: amount}("");
-    require(sent, "Failed to send Ether");
+    token.approve(dispenserAddress, amount);
+    dispenser.receiveTokens(amount);
     successors[key].fundsBeenReleased = true;
     emit FundsTransfered(dispenserAddress, amount);
     dispenser.withdraw();
