@@ -8,7 +8,9 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.0",
-    "bignumber.js": "^9.0.2"
+    "@truffle/hdwallet-provider": "^2.0.12",
+    "bignumber.js": "^9.0.2",
+    "truffle-hdwallet-provider": "^1.0.17"
   },
   "devDependencies": {},
   "scripts": {

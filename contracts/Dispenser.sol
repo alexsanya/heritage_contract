@@ -6,7 +6,8 @@ contract Dispenser {
   address owner;
   address recipient;
   IERC20 token;
-  uint lastWithdrawalTime;
+  uint public lastWithdrawalTime;
+  uint public totalWithdrawed;
 
   event FundsSentToRecipient(address wallet, uint value);
   event FundsReceived(uint value);
@@ -42,6 +43,7 @@ contract Dispenser {
     bool sent = token.transfer(recipient, value);
     require(sent, "Failed to send tokens");
     emit FundsSentToRecipient(recipient, value);
+    totalWithdrawed += value;
     lastWithdrawalTime = block.timestamp;
     balance -= value;
   }

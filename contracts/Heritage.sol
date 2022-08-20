@@ -8,7 +8,7 @@ struct Successor {
   string name;
   uint share;
   address wallet;
-  Dispenser dispenser;
+  address dispenser;
   uint maxPerMonth;
   bool fundsBeenReleased;
 }
@@ -28,15 +28,17 @@ contract Heritage {
   event Withdrowal(uint amount);
   event TokenDeposit(uint amount);
   event TokenWithdrowal(uint amount);
+  event RegisterSuccessor(address successor, bool isRegistered);
+  event InvalidSuccessor(address successor);
   event SetSuccessors();
   event SuccessorClaimingShare(address successor, uint share);
   event ReleasingFunds(address dispenser, uint amount, uint balance);
   event FundsTransfered(address successor, uint amount);
   event DelegateCallToDispenser();
 
-  constructor(uint unlockTimeline, IERC20 tokenAddress) {
+  constructor(uint unlockTimeline, address tokenAddress) {
     owner = payable(msg.sender);
-    token = tokenAddress;
+    token = IERC20(tokenAddress);
     numberOfSuccessors = 0;
     successorsListVersion = 0;
     lastPingTime = block.timestamp;
@@ -81,15 +83,18 @@ contract Heritage {
     maxPeriodOfSilense = holdingPeriod;
   }
 
-  function setSuccessors(Successor[] calldata newSuccessors) public onlyOwner {
+  function setSuccessors(Successor[] calldata newSuccessors) public {//onlyOwner {
+    emit InvalidSuccessor(msg.sender);
     uint total = 0;
     successorsListVersion++;
     for (uint i=0; i<newSuccessors.length; i++) {
+      emit InvalidSuccessor(newSuccessors[i].wallet);
       require(potentialSuccessors[newSuccessors[i].wallet]);
       total += newSuccessors[i].share;
       bytes32 key = keccak256(abi.encodePacked(successorsListVersion, newSuccessors[i].wallet));
       successors[key] = newSuccessors[i];
-      successors[key].dispenser = new Dispenser(token, newSuccessors[i].maxPerMonth, newSuccessors[i].wallet);
+      Dispenser dispenser = new Dispenser(token, newSuccessors[i].maxPerMonth, newSuccessors[i].wallet);
+      successors[key].dispenser = address(dispenser);
       numberOfSuccessors += 1;
     }
     require(total == 100, "sum of shares should be equal to 100");
@@ -103,6 +108,7 @@ contract Heritage {
 
   function registerSuccessorApplicant() public {
     potentialSuccessors[msg.sender] = true;
+    emit RegisterSuccessor(msg.sender, potentialSuccessors[msg.sender]);
   }
 
   function resetCountdownTimer() public onlyOwner {
@@ -117,9 +123,8 @@ contract Heritage {
     bytes32 key = keccak256(abi.encodePacked(successorsListVersion, msg.sender));
     require(successors[key].share > 0);
     emit SuccessorClaimingShare(msg.sender, successors[key].share);
-    //address dispenserAddress = successors[key].dispenser;
-    Dispenser dispenser = successors[key].dispenser;//Dispenser(dispenserAddress);
-    address dispenserAddress = address(dispenser);
+    address dispenserAddress = successors[key].dispenser;
+    Dispenser dispenser = Dispenser(dispenserAddress);
     if (successors[key].fundsBeenReleased) {
       emit DelegateCallToDispenser();
       dispenser.withdraw();
