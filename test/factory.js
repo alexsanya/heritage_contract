@@ -25,7 +25,7 @@ contract("Factory", (accounts) => {
     assert.equal(contractName, "New testament");
   });
 
-  it.only("Should delegate setSuccessors", async () => {
+  it("Should update successors in parent factory", async () => {
     await factory.create("New testament", token.address, 100);
     const contractAddress = await factory.ownerToContracts(accounts[0], 0);
     const successors = [
@@ -40,18 +40,14 @@ contract("Factory", (accounts) => {
     ];
     const heritage = await Heritage.at(contractAddress);
     await heritage.registerSuccessorApplicant({ from: accounts[2] });
-    const result = await heritage.potentialSuccessors(accounts[2]);
-    console.log(accounts[2]);
-    console.log(result);
-    await factory.setSuccessors(contractAddress, successors);
+    await heritage.potentialSuccessors(accounts[2]);
+    await heritage.setSuccessors(successors);
     const numberOfSuccessors = await factory.contractToSuccessorNumber(contractAddress);
     const numberOfContracts = await factory.successorToContractsNumber(accounts[2]);
     const contract = await factory.successorToContracts(accounts[2], 0);
-    const successor = await factory.contractToSuccessors(contractAddress, 0);
 
     assert.equal(numberOfSuccessors, 1);
     assert.equal(numberOfContracts, 1);
     assert.equal(contract, contractAddress);
-    assert.equal(successor, accounts[2]);
   });
 })

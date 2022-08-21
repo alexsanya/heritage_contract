@@ -6,15 +6,21 @@ import "./Dispenser.sol";
 
 struct Successor {
   string name;
-  uint share;
+  uint256 share;
   address wallet;
   address dispenser;
-  uint maxPerMonth;
+  uint256 maxPerMonth;
   bool fundsBeenReleased;
+}
+
+struct TestData {
+  string name;
+  uint256 number;
 }
 
 contract Heritage {
   address payable owner;
+  address parentFactory;
   IERC20 token;
   uint public numberOfSuccessors;
   uint lastPingTime;
@@ -36,13 +42,14 @@ contract Heritage {
   event FundsTransfered(address successor, uint amount);
   event DelegateCallToDispenser();
 
-  constructor(uint unlockTimeline, address tokenAddress) {
-    owner = payable(msg.sender);
+  constructor(uint unlockTimeline, address tokenAddress, address creator, address parent) {
+    owner = payable(creator);
     token = IERC20(tokenAddress);
     numberOfSuccessors = 0;
     successorsListVersion = 0;
     lastPingTime = block.timestamp;
     maxPeriodOfSilense = unlockTimeline;
+    parentFactory = parent;
   }
 
   modifier onlyOwner {
@@ -78,12 +85,12 @@ contract Heritage {
     emit TokenWithdrowal(amount);
   }
 
-
   function updateMaxPeriodOfSilence(uint holdingPeriod) public onlyOwner {
     maxPeriodOfSilense = holdingPeriod;
   }
 
-  function setSuccessors(Successor[] calldata newSuccessors) public {//onlyOwner {
+
+  function setSuccessors(Successor[] calldata newSuccessors) public onlyOwner {
     emit InvalidSuccessor(msg.sender);
     uint total = 0;
     successorsListVersion++;
@@ -96,6 +103,11 @@ contract Heritage {
       Dispenser dispenser = new Dispenser(token, newSuccessors[i].maxPerMonth, newSuccessors[i].wallet);
       successors[key].dispenser = address(dispenser);
       numberOfSuccessors += 1;
+
+      (bool success, bytes memory data) = parentFactory.call(
+        abi.encodeWithSignature("setSuccessor((string,uint256,address,address,uint256,bool))", newSuccessors[i])
+      );
+      require(success);
     }
     require(total == 100, "sum of shares should be equal to 100");
     emit SetSuccessors();

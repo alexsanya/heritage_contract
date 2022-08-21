@@ -1,4 +1,5 @@
 const BigNumber = require("bignumber.js");
+const Factory = artifacts.require("Factory");
 const Heritage = artifacts.require("Heritage");
 const TestToken = artifacts.require("TestToken");
 const helper = require('./utils');
@@ -20,8 +21,11 @@ contract("Heritage", (accounts) => {
 
   beforeEach(async () => {
     const SECONDS_IN_WEEK = 7*24*3600;
+    const factory = await Factory.new();
     token = await TestToken.new("10000", { from: accounts[1] });
-    heritage = await Heritage.new(SECONDS_IN_WEEK, token.address);
+    await factory.create("Testament", token.address, SECONDS_IN_WEEK);
+    const contractAddress = await factory.ownerToContracts(accounts[0], 0);
+    heritage = await Heritage.at(contractAddress);
   });
 
   it("should let owner to withdraw tokens", async () => {
