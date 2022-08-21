@@ -50,4 +50,25 @@ contract("Factory", (accounts) => {
     assert.equal(numberOfContracts, 1);
     assert.equal(contract, contractAddress);
   });
+
+  it("Should only let update successors from the contract", async () => {
+    const successor = {
+      name: "Alex",
+      share: "100",
+      wallet: accounts[2],
+      dispenser: ZERO_ADDRESS,
+      fundsBeenReleased: false,
+      maxPerMonth: "1000000"
+    }
+    
+    try {
+      await factory.create("New testament", token.address, 100);
+      await factory.setSuccessor(successor);
+    } catch {
+      assert(true);
+      return;
+    }
+
+    assert(false);
+  })
 })
