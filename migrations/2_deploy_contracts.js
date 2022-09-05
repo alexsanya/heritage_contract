@@ -5,7 +5,8 @@ var Factory = artifacts.require("Factory");
 module.exports = function(deployer) {
   //const SEVEN_DAYS = 60*60*24*7;
 
-  deployer.deploy(Factory);
+  //deployer.deploy(Factory);
+
   //return deployer.deploy(Token, "10000").then(({ address }) => {
   //  const deployTestament = deployer.deploy(Heritage, address, SEVEN_DAYS).catch(error => {
   //    console.log(error);
@@ -15,9 +16,9 @@ module.exports = function(deployer) {
   //  return Promise.all([deployTestament, deployFactory]);
   //}).catch(error => console.log(error));
 
-  //return Promise.all([
-  //  deployer.deploy(Factory),
-  //  deployer.deploy(Heritage)
-  //]);
+  return Promise.all([
+    deployer.deploy(Factory),
+    deployer.deploy(Token, "10000")
+  ]);
 
 };

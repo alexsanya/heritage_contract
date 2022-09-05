@@ -21,11 +21,11 @@ struct TestData {
 contract Heritage {
   address payable owner;
   address parentFactory;
-  IERC20 token;
+  IERC20 public token;
   uint public numberOfSuccessors;
   uint lastPingTime;
   uint public maxPeriodOfSilense;
-  uint totalVolume;
+  uint public totalVolume;
   uint32 successorsListVersion;
   mapping(bytes32 => Successor) public successors;
   mapping(address => bool) public potentialSuccessors;

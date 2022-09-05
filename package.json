@@ -10,6 +10,7 @@
     "@openzeppelin/contracts": "^4.7.0",
     "@truffle/hdwallet-provider": "^2.0.12",
     "bignumber.js": "^9.0.2",
+    "create-react-app": "^5.0.1",
     "truffle-hdwallet-provider": "^1.0.17"
   },
   "devDependencies": {},
