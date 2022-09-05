@@ -49,7 +49,7 @@ function Owner() {
         token.methods.decimals().call()
       ]);
 
-      return { address, name, numberOfSuccessors, releasePeriod, lastPingTime, balance: rawBalance / decimals };
+      return { address, name, numberOfSuccessors, releasePeriod, lastPingTime, balance: rawBalance / 10**decimals };
     }
 
     const contractDetails = await Promise.all(
