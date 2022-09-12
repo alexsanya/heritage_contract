@@ -69,6 +69,17 @@ function Owner() {
     return Math.round((Date.now() - lastPing * 1e3) / (24*3600*1e3));
   }
 
+  const resetTimer = async (address: string) => {
+    const testament = getTestament(address);
+
+    const result = await testament.methods.resetCountdownTimer().send({
+      from: account
+    });
+
+    console.log('Reseting timer...');
+  }
+
+  const getEditLink = (address: string) => `/edit-contract/${address}`;
 
   const ExistingContracts: React.FC<{ contracts: ContractData[] }> = ({ contracts }) => {
     return (
@@ -94,8 +105,10 @@ function Owner() {
                 </Typography>
               </CardContent>
               <CardActions>
-                <Button size="small">Edit</Button>
-                <Button size="small">Reset timer</Button>
+                <Link to={ getEditLink(contract.address) }>
+                  <Button size="small">Edit</Button>
+                </Link>
+                <Button size="small" onClick={() => resetTimer(contract.address)}>Reset timer</Button>
               </CardActions>
             </Card>
           </Grid>

@@ -5,7 +5,7 @@ import FactoryABI from './abi/factory.json';
 
 const instance = new web3.eth.Contract(
   FactoryABI.abi as AbiItem[],
-  '0xB24FdcB89efAB60228c6773B709C2d0F857626Df'
+  '0x5A71A0B8e85DBfAa9E3Fcb8FCefDDF3C65173C76'
 );
 
 export default instance;

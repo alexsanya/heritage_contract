@@ -3,6 +3,7 @@ import App from './App';
 import Owner from './Owner';
 import Successor from './Successor';
 import NewContract from './NewContract';
+import EditContract from './EditContract';
 
 import { Metamask } from './metamask';
 
@@ -25,6 +26,7 @@ root.render(
         <Route path="/owner" element={<Owner />}></Route>
         <Route path="/successor" element={<Successor />}></Route>
         <Route path="/newContract" element={<NewContract />}></Route>
+        <Route path="/edit-contract/:address" element={<EditContract />}></Route>
       </Routes>
     </BrowserRouter>
   </Metamask>
