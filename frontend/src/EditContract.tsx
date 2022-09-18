@@ -5,6 +5,7 @@ import Grid from '@mui/material/Grid';
 import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import Stack from '@mui/material/Stack';
 import web3 from './web3';
 import BN from 'bn.js';
 import { MetamaskContext } from './ConnectWallet';
@@ -80,11 +81,12 @@ function EditContract() {
           ...successorsData,
           [successor.name]: {
             limit: successor.maxPerMonth,
-            share: successor.share,
+            share: +successor.share,
             wallet: successor.wallet
           }
         }
       }
+      console.log(successorsData);
       setSuccessors(successorsData);
       
 
@@ -186,15 +188,30 @@ function EditContract() {
       from: account
     });
   }
+  
+  const onRemove = (nameToRemove: string) => {
+    const share = successors[nameToRemove].share;
+    
+    const names = Object.keys(successors).filter(name => name !== nameToRemove);
+    const absorber = _.last(names);
+
+    setSuccessors(names.reduce((acc, name) => ({
+      ...acc,
+      [name]: name === absorber ? { ...successors[name], share: successors[name].share + share } : successors[name]
+    }), {}));
+  }
 
   return (
     <>
-      <h1>Editing contract {contractName}</h1>
       <Grid container spacing={2}>
+        <Grid xs display="flex" justifyContent="center" alignItems="center">
+          <h1>{contractName}</h1>
+        </Grid>
         <Grid item xs={12}>
           <SuccessorsList
             successors={successors}
             onChange={updateSuccessors}
+            onRemove={onRemove}
           />
         </Grid>
         <Grid item xs={12}>

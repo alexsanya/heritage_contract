@@ -1,4 +1,5 @@
 import ReactDOM from "react-dom/client";
+import Container from '@mui/material/Container';
 import App from './App';
 import Owner from './Owner';
 import Successor from './Successor';
@@ -20,14 +21,16 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <Metamask>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />}></Route>
-        <Route path="/owner" element={<Owner />}></Route>
-        <Route path="/successor" element={<Successor />}></Route>
-        <Route path="/newContract" element={<NewContract />}></Route>
-        <Route path="/edit-contract/:address" element={<EditContract />}></Route>
-      </Routes>
-    </BrowserRouter>
+    <Container maxWidth="sm">
+      <BrowserRouter>
+        <Routes>
+            <Route path="/" element={<App />}></Route>
+            <Route path="/owner" element={<Owner />}></Route>
+            <Route path="/successor" element={<Successor />}></Route>
+            <Route path="/newContract" element={<NewContract />}></Route>
+            <Route path="/edit-contract/:address" element={<EditContract />}></Route>
+        </Routes>
+      </BrowserRouter>
+    </Container>
   </Metamask>
 );

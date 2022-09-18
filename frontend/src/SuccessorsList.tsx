@@ -1,4 +1,7 @@
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Slider from '@mui/material/Slider';
+import Stack from '@mui/material/Stack';
 
 export interface SuccessorConstraints {
   limit: number;
@@ -8,10 +11,11 @@ export interface SuccessorConstraints {
 
 type Props = {
   successors: {[name: string]: SuccessorConstraints},
-  onChange: (name: string, share: number, limit: number) => void  
+  onChange: (name: string, share: number, limit: number) => void,
+  onRemove: (name: string) => void
 }
 
-export const SuccessorsList: React.FC<Props> = ({ successors, onChange }) => {
+export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove }) => {
   const successorsNames =  Object.keys(successors);
   const absorber = successorsNames[successorsNames.length - 1];
 
@@ -22,7 +26,7 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange }) => {
 
   const getSuccessorsList = () => {
     return successorsNames.map(name => (
-      <>
+      <Stack direction="row" alignItems="center" spacing={1}>
         <div>{ name }</div>
         <Slider
           aria-label="Share"
@@ -35,7 +39,10 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange }) => {
           valueLabelDisplay="on"
           disabled={ name === absorber }
         />
-      </>
+        <IconButton aria-label="delete" size="small" onClick={() => onRemove(name)}>
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </Stack>
     ));
   }
 
