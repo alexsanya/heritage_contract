@@ -204,8 +204,10 @@ function EditContract() {
   return (
     <>
       <Grid container spacing={2}>
-        <Grid xs display="flex" justifyContent="center" alignItems="center">
-          <h1>{contractName}</h1>
+        <Grid item xs={12}> 
+          <Grid display="flex" justifyContent="center" alignItems="center"> 
+            <h1>{contractName}</h1>
+          </Grid>
         </Grid>
         <Grid item xs={12}>
           <SuccessorsList
@@ -215,7 +217,9 @@ function EditContract() {
           />
         </Grid>
         <Grid item xs={12}>
-          <Button onClick={updateShares}>Update shares</Button>
+          <Grid display="flex" justifyContent="center" alignItems="center"> 
+            <Button onClick={updateShares}>Update shares</Button>
+          </Grid>
         </Grid>
         <Grid item xs={6}>
           <Grid container spacing={2}>

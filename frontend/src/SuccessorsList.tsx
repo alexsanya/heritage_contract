@@ -39,9 +39,11 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove
           valueLabelDisplay="on"
           disabled={ name === absorber }
         />
-        <IconButton aria-label="delete" size="small" onClick={() => onRemove(name)}>
-          <DeleteIcon fontSize="small" />
-        </IconButton>
+        { successorsNames.length > 1 && (
+          <IconButton aria-label="delete" size="small" onClick={() => onRemove(name)}>
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        ) }
       </Stack>
     ));
   }
