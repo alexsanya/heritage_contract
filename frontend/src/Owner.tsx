@@ -42,7 +42,7 @@ function Owner() {
       const token = getERC20(tokenMint);
       const [ name, numberOfSuccessors, releasePeriod, lastPingTime, rawBalance, decimals ] = await Promise.all([
         factory.methods.contractNames(address).call(),
-        factory.methods.contractToSuccessorNumber(address).call(),
+        testament.methods.numberOfSuccessors().call(),
         testament.methods.maxPeriodOfSilense().call(),
         testament.methods.getCountdownValue().call(),
         testament.methods.totalVolume().call(),

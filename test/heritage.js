@@ -90,6 +90,9 @@ contract("Heritage", (accounts) => {
     const numberOfSuccessors = await heritage.numberOfSuccessors();
     assert.equal(numberOfSuccessors, "1");
     assert(await heritage.checkIfImSuccessor({ from: accounts[1] }));
+    const successorFromList = await heritage.listOfSuccessors(0);
+    assert.equal(successorFromList, accounts[1]);
+
   })
 
   it("should let owner to replace successors list", async () => {
@@ -126,6 +129,8 @@ contract("Heritage", (accounts) => {
     assert.equal(numberOfSuccessors, "1");
     assert(await heritage.checkIfImSuccessor({ from: accounts[2] }));
     assert.equal(await heritage.checkIfImSuccessor({ from: accounts[1] }), false);
+    const successorFromList = await heritage.listOfSuccessors(0);
+    assert.equal(successorFromList, accounts[2]);
   })
 
 
@@ -197,6 +202,14 @@ contract("Heritage", (accounts) => {
     await heritage.setSuccessors(successors);
     const numberOfSuccessors = await heritage.numberOfSuccessors();
     assert.equal(numberOfSuccessors, "2");
+
+    const [firstSuccessor, secondSuccessor] = await Promise.all([
+      heritage.listOfSuccessors(0),
+      heritage.listOfSuccessors(1),
+    ]);
+    assert.equal(firstSuccessor, accounts[1]);
+    assert.equal(secondSuccessor, accounts[2]);
+
   })
 
   it("should fail to add successors if sum of shares is other than 100", async () => {

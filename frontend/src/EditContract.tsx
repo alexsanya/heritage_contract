@@ -2,9 +2,11 @@ import { useState, useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import * as _ from 'lodash';
 import Grid from '@mui/material/Grid';
+import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import web3 from './web3';
+import BN from 'bn.js';
 import { MetamaskContext } from './ConnectWallet';
 import { SuccessorsList, SuccessorConstraints } from './SuccessorsList';
 
@@ -24,20 +26,23 @@ function EditContract() {
   const [contractName, setContractName] = useState('');
   const [succesorAddress, setSuccesorAddress] = useState('');
   const [successorName, setSuccessorName] = useState('');
-  const [successors, setSuccessors] = useState<{ [name: string]: SuccessorConstraints }>({
-    'Alex': {
-      limit: 1e10,
-      share: 100
-    },
-    'Mike': {
-      limit: 5000,
-      share: 0
-    },
-    'Tom': {
-      limit: 3000,
-      share: 0
-    }
-  });
+  const [showAddressFoundLabel, setShowAddressFoundLabel] = useState(false);
+  const [showNotFoundLabel, setShowNotFoundLabel] = useState(false);
+  const [successors, setSuccessors] = useState<{ [name: string]: SuccessorConstraints }>({});
+
+   // 'Alex': {
+   //   limit: 1e10,
+   //   share: 100
+   // },
+   // 'Mike': {
+   //   limit: 5000,
+   //   share: 0
+   // },
+   // 'Tom': {
+   //   limit: 3000,
+   //   share: 0
+   // }
+
 
 
   useEffect(() => {
@@ -55,6 +60,33 @@ function EditContract() {
       setToken(token);
       setDecimals(decimals);
       setContractName(contractName);
+
+      const successorsListVersion = await testament.methods.successorsListVersion().call();
+      const successorsNumber = await testament.methods.numberOfSuccessors().call();
+      console.log(`Successors number: ${successorsNumber}`);
+      console.log(`successorsListVersion: ${successorsListVersion}`);
+      let successorsData = {}
+      for (let i=0; i < successorsNumber; i++) {
+        const wallet = await testament.methods.listOfSuccessors(i).call();
+        console.log(`Wallet: ${wallet}`);
+        const key = web3.utils.soliditySha3(
+          {t: 'uint32', v: new BN(successorsListVersion)},
+          {t: 'address', v: wallet},
+        );      
+        console.log('Key:', key);
+        const successor = await testament.methods.successors(key).call();
+        console.log(successor);
+        successorsData = {
+          ...successorsData,
+          [successor.name]: {
+            limit: successor.maxPerMonth,
+            share: successor.share,
+            wallet: successor.wallet
+          }
+        }
+      }
+      setSuccessors(successorsData);
+      
 
       console.log({ testament, tokenMint, token, decimals });
     })();
@@ -78,29 +110,81 @@ function EditContract() {
     await testament.methods.withdrawTokens(value).send({ from: account });
   }
 
-  const onSuccessorAddressChange = async () => {
+  const onSuccessorAddressChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setShowAddressFoundLabel(false);
+    setShowNotFoundLabel(false);
+    setSuccesorAddress(event.target.value);
   }
 
-  const onSuccessorNameChange = async () => {
+  const onSuccessorNameChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSuccessorName(event.target.value);
   }
 
   const updateSuccessors = (name: string, share: number, limit: number) => {
     const successorsNames =  Object.keys(successors);
     const absorber = successorsNames[successorsNames.length - 1];
+    console.log(`Absorber: ${absorber}`);
     const preUpdatedValues = { 
       ...successors, 
-      [name]: {share: Math.min(share, successors[name].share+successors[absorber].share), limit},
+      [name]: {
+        ...successors[name],
+        share: Math.min(share, successors[name].share+successors[absorber].share)
+      },
     }
     const updatedValues = {
       ...preUpdatedValues,
       [absorber]: {
+        ...successors[absorber],
         share: 100 - successorsNames.filter(name => name != absorber).reduce((acc, name) => acc+preUpdatedValues[name].share, 0),
-        limit: successors[absorber].limit
       }
     }
     console.log(name, share, limit);
     console.log(updatedValues);
     setSuccessors(updatedValues);
+  }
+
+  const checkIfAddressRegistered = async () => {
+    setShowAddressFoundLabel(false);
+    setShowNotFoundLabel(false);
+    const isRegistered = await testament.methods.potentialSuccessors(succesorAddress).call();
+    if (isRegistered) {
+      setShowAddressFoundLabel(true);
+    } else {
+      setShowNotFoundLabel(true);
+    }
+  }
+  
+  const addSuccessor = async () => {
+    const share = (Object.keys(successors).length) > 0 ? 0 : 100;
+    setSuccessors({
+      ...successors,
+      [successorName]: {
+        wallet: succesorAddress,
+        limit: 1e10,
+        share    
+      }
+    });
+    setSuccessorName('');
+    setSuccesorAddress('');
+    setShowAddressFoundLabel(false);
+    setShowNotFoundLabel(false);
+  }
+
+  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+  const updateShares = async () => {
+    const successorsData = Object.keys(successors).map(name => ({
+      name,
+      share: successors[name].share.toString(),
+      wallet: successors[name].wallet,
+      dispenser: ZERO_ADDRESS,
+      fundsBeenReleased: false,
+      maxPerMonth: successors[name].limit.toString()
+    }));
+    console.log(successorsData);
+    await testament.methods.setSuccessors(successorsData).send({
+      from: account
+    });
   }
 
   return (
@@ -114,7 +198,7 @@ function EditContract() {
           />
         </Grid>
         <Grid item xs={12}>
-          <Button>Update shares</Button>
+          <Button onClick={updateShares}>Update shares</Button>
         </Grid>
         <Grid item xs={6}>
           <Grid container spacing={2}>
@@ -126,7 +210,11 @@ function EditContract() {
                 value={succesorAddress}
                 onChange={onSuccessorAddressChange}
               />
-              <Button>Check</Button>
+              <Button onClick={checkIfAddressRegistered}>Check</Button>
+            </Grid>
+            <Grid item xs={12}>
+              { showAddressFoundLabel && (<Chip label={succesorAddress} color="success" />) }
+              { showNotFoundLabel && (<Chip label="Address is not registered" color="warning" />) }
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -136,7 +224,7 @@ function EditContract() {
                 value={successorName}
                 onChange={onSuccessorNameChange}
               />
-              <Button>Add</Button>
+              <Button disabled={!showAddressFoundLabel || !successorName.length} onClick={addSuccessor}>Add</Button>
             </Grid>
           </Grid>
         </Grid>

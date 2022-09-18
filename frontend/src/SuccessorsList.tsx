@@ -3,6 +3,7 @@ import Slider from '@mui/material/Slider';
 export interface SuccessorConstraints {
   limit: number;
   share: number;
+  wallet: string;
 }
 
 type Props = {

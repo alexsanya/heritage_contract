@@ -26,7 +26,8 @@ contract Heritage {
   uint lastPingTime;
   uint public maxPeriodOfSilense;
   uint public totalVolume;
-  uint32 successorsListVersion;
+  uint32 public successorsListVersion;
+  address[10] public listOfSuccessors;
   mapping(bytes32 => Successor) public successors;
   mapping(address => bool) public potentialSuccessors;
 
@@ -94,8 +95,8 @@ contract Heritage {
     emit InvalidSuccessor(msg.sender);
     uint total = 0;
     successorsListVersion++;
+    numberOfSuccessors = 0;
     for (uint i=0; i<newSuccessors.length; i++) {
-      emit InvalidSuccessor(newSuccessors[i].wallet);
       require(potentialSuccessors[newSuccessors[i].wallet]);
       total += newSuccessors[i].share;
       bytes32 key = keccak256(abi.encodePacked(successorsListVersion, newSuccessors[i].wallet));
@@ -108,6 +109,7 @@ contract Heritage {
         abi.encodeWithSignature("setSuccessor((string,uint256,address,address,uint256,bool))", newSuccessors[i])
       );
       require(success);
+      listOfSuccessors[i] = newSuccessors[i].wallet;
     }
     require(total == 100, "sum of shares should be equal to 100");
     emit SetSuccessors();
