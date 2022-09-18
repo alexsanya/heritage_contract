@@ -13,6 +13,7 @@ import Typography from '@mui/material/Typography';
 import web3 from './web3';
 import BN from 'bn.js';
 import factory from './factory';
+import getERC20 from './getERC20';
 import getTestament from './getTestament';
 import { MetamaskContext } from './ConnectWallet';
 
@@ -60,10 +61,19 @@ function Successor() {
       return key;
     }
 
+    const getScale = async (address: string) => {
+      const tokenMint = await getTestament(address).methods.token().call();
+      const token = getERC20(tokenMint);
+      const decimals = await token.methods.decimals().call();
+      return 10**decimals;
+    }
+
+
+
     const contracts = await Promise.all(
       _.uniq(contractsList).map(async (address) => ({
           name: await factory.methods.contractNames(address).call(),
-          volume: await getTestament(address).methods.totalVolume().call(),
+          volume: await getTestament(address).methods.totalVolume().call() / await getScale(address),
           isValid: await getTestament(address).methods
             .successors(
               await getKey(address, account || '')
