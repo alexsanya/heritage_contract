@@ -65,7 +65,7 @@ function EditContract() {
         successorsData = {
           ...successorsData,
           [successor.name]: {
-            limit: successor.maxPerMonth,
+            limit: new BN(successor.maxPerMonth).div(new BN(10**decimals)).toNumber(),
             share: +successor.share,
             wallet: successor.wallet
           }
@@ -108,6 +108,7 @@ function EditContract() {
   }
 
   const updateSuccessors = (name: string, share: number, limit: number) => {
+  console.log(`Limit is ${limit}`);
     const successorsNames =  Object.keys(successors);
     const absorber = successorsNames[successorsNames.length - 1];
     console.log(`Absorber: ${absorber}`);
@@ -123,11 +124,17 @@ function EditContract() {
       [absorber]: {
         ...successors[absorber],
         share: 100 - successorsNames.filter(name => name != absorber).reduce((acc, name) => acc+preUpdatedValues[name].share, 0),
-      }
+      },
     }
     console.log(name, share, limit);
     console.log(updatedValues);
-    setSuccessors(updatedValues);
+    setSuccessors({
+      ...updatedValues,
+      [name]: {
+        ...successors[name],
+        limit
+      }
+    });
   }
 
   const checkIfAddressRegistered = async () => {
@@ -166,7 +173,7 @@ function EditContract() {
       wallet: successors[name].wallet,
       dispenser: ZERO_ADDRESS,
       fundsBeenReleased: false,
-      maxPerMonth: successors[name].limit.toString()
+      maxPerMonth: new BN(successors[name].limit).mul(new BN(10**decimals)).toString()
     }));
     console.log(successorsData);
     await testament.methods.setSuccessors(successorsData).send({
