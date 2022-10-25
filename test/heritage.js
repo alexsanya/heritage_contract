@@ -262,7 +262,7 @@ contract("Heritage", (accounts) => {
   })
 
   it("should return true on isFundsReleaseAvailible when deadline expired", async() => {
-    await helper.advanceTimeAndBlock(SEVEN_DAYS);
+    await helper.advanceTimeAndBlock(SEVEN_DAYS + 1);
     const isFundsReleaseAvailible = await heritage.isFundsReleaseAvailible();
     assert.equal(isFundsReleaseAvailible, true);
   });
@@ -315,7 +315,7 @@ contract("Heritage", (accounts) => {
     });
 
     it("should let a successor to claim his share after deadline have past", async () => {
-      await helper.advanceTimeAndBlock(SEVEN_DAYS);
+      await helper.advanceTimeAndBlock(SEVEN_DAYS + 1);
       await (async () => { //Alex claims share
         const balanceBefore = await token.balanceOf(accounts[1]);
         const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
@@ -336,7 +336,7 @@ contract("Heritage", (accounts) => {
     it("should let a successor to claim his share monthly", async () => {
       const ONE_MONTH_AND_ONE_DAY = 3600*24*31;
 
-      await helper.advanceTimeAndBlock(SEVEN_DAYS);
+      await helper.advanceTimeAndBlock(SEVEN_DAYS + 1);
       await (async () => { //Alex claims share
         const balanceBefore = await token.balanceOf(accounts[1]);
         const { receipt } = await heritage.claimHeritage({ from: accounts[1] });
@@ -366,7 +366,7 @@ contract("Heritage", (accounts) => {
     });
 
     it("should prevent non-successor from claiming the share after deadline have past", async () => {
-      await helper.advanceTimeAndBlock(Math.round(SEVEN_DAYS));
+      await helper.advanceTimeAndBlock(Math.round(SEVEN_DAYS + 1));
       try {
         await heritage.claimHeritage({ from: accounts[3] });
       } catch (error) {

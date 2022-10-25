@@ -10,8 +10,8 @@ contract Factory {
   mapping(address => uint) public successorToContractsNumber;
   mapping(address => string) public contractNames;
 
-  function create(string calldata name, address token, uint daysToRelease) public {
-    Heritage newContract = new Heritage(daysToRelease, token, msg.sender, address(this));
+  function create(string calldata name, address token, uint secondsToRelease) public {
+    Heritage newContract = new Heritage(secondsToRelease, token, msg.sender, address(this));
     contractNames[address(newContract)] = name;
     ownerToContracts[msg.sender].push(address(newContract));
     ownerToContractsNumber[msg.sender] += 1;

@@ -163,7 +163,6 @@ contract Heritage {
     token.approve(dispenserAddress, amount);
     dispenser.receiveTokens(amount);
     successors[key].fundsBeenReleased = true;
-    totalVolume -= amount;
     emit FundsTransfered(dispenserAddress, amount);
     dispenser.withdraw();
   }
