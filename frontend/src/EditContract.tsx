@@ -31,21 +31,6 @@ function EditContract() {
   const [showNotFoundLabel, setShowNotFoundLabel] = useState(false);
   const [successors, setSuccessors] = useState<{ [name: string]: SuccessorConstraints }>({});
 
-   // 'Alex': {
-   //   limit: 1e10,
-   //   share: 100
-   // },
-   // 'Mike': {
-   //   limit: 5000,
-   //   share: 0
-   // },
-   // 'Tom': {
-   //   limit: 3000,
-   //   share: 0
-   // }
-
-
-
   useEffect(() => {
     (async () => {
       if (!address) {

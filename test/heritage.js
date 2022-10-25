@@ -261,6 +261,17 @@ contract("Heritage", (accounts) => {
     assert(false);
   })
 
+  it("should return true on isFundsReleaseAvailible when deadline expired", async() => {
+    await helper.advanceTimeAndBlock(SEVEN_DAYS);
+    const isFundsReleaseAvailible = await heritage.isFundsReleaseAvailible();
+    assert.equal(isFundsReleaseAvailible, true);
+  });
+
+  it("should return false on isFundsReleaseAvailible when deadline isnt expired", async() => {
+    const isFundsReleaseAvailible = await heritage.isFundsReleaseAvailible();
+    assert.equal(isFundsReleaseAvailible, false);
+  });
+
   describe("Withdrawal of shares" , () => {
 
     let snapshotId;
@@ -340,7 +351,7 @@ contract("Heritage", (accounts) => {
         assert.equal(balanceAfter.toNumber(), balanceBefore.toNumber() + 2);
       })()
 
-    })
+    });
 
 
     it("should prevent successor from claiming his share if deadline haven't passed", async () => {
@@ -352,7 +363,7 @@ contract("Heritage", (accounts) => {
         return;
       }
       assert(false);
-    })
+    });
 
     it("should prevent non-successor from claiming the share after deadline have past", async () => {
       await helper.advanceTimeAndBlock(Math.round(SEVEN_DAYS));
@@ -363,7 +374,7 @@ contract("Heritage", (accounts) => {
         return;
       }
       assert(false);
-    })
+    });
 
   });
 

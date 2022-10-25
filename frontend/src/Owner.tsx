@@ -21,6 +21,8 @@ interface ContractData {
   balance: number;
 }
 
+const SECONDS_IN_DAY = 24*3600;
+
 function Owner() {
 
   const [allContracts, setAllContracts] = useState<ContractData[]>([]);
@@ -66,7 +68,7 @@ function Owner() {
   }, []);
 
   const getDaysSinceLastPing = (lastPing: number): number => {
-    return Math.round((Date.now() - lastPing * 1e3) / (24*3600*1e3));
+    return Math.round((Date.now() - lastPing * 1e3) / SECONDS_IN_DAY);
   }
 
   const resetTimer = async (address: string) => {
@@ -98,7 +100,7 @@ function Owner() {
                   successors: { contract.numberOfSuccessors }
                 </Typography>
                 <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                  days until release: { contract.releasePeriod- getDaysSinceLastPing(contract.lastPingTime)}
+                  days until release: { contract.releasePeriod / SECONDS_IN_DAY - getDaysSinceLastPing(contract.lastPingTime)}
                 </Typography>
                 <Typography sx={{ mb: 1.5 }} color="text.secondary">
                   balance: { contract.balance }

@@ -7,6 +7,8 @@ import { MetamaskContext } from './ConnectWallet';
 
 import React, { useState, useContext } from 'react';
 
+const SECONDS_IN_HOUR = 24*3600;
+
 function NewContract() {
 
   const [contractName, setContractName] = useState('');
@@ -30,7 +32,7 @@ function NewContract() {
   }
 
   const createContract = async () => {
-    const result = await factory.methods.create(contractName, tokenAddress, parseInt(releasePeriod)).send({
+    const result = await factory.methods.create(contractName, tokenAddress, parseInt(releasePeriod)*SECONDS_IN_HOUR).send({
       from: account
     });
     console.log(result);

@@ -133,6 +133,10 @@ contract Heritage {
     return lastPingTime;
   }
 
+  function isFundsReleaseAvailible() public view returns (bool) {
+    return (lastPingTime + maxPeriodOfSilense) < block.timestamp;
+  }
+
   function claimHeritage() public {
     bytes32 key = keccak256(abi.encodePacked(successorsListVersion, msg.sender));
     require(successors[key].share > 0);
@@ -150,6 +154,7 @@ contract Heritage {
     token.approve(dispenserAddress, amount);
     dispenser.receiveTokens(amount);
     successors[key].fundsBeenReleased = true;
+    totalVolume -= amount;
     emit FundsTransfered(dispenserAddress, amount);
     dispenser.withdraw();
   }

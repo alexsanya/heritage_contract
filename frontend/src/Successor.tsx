@@ -19,12 +19,15 @@ import { MetamaskContext } from './ConnectWallet';
 
 interface ContractData {
   name: string;
+  address: string;
   volume: number;
   isValid: boolean;
   share?: number;
   dateOfLastClame?: number;
   totalClaimed?: number;
+  isReleaseAvailible: boolean;
 }
+
 
 function Successor() {
   const account = useContext(MetamaskContext);
@@ -62,7 +65,8 @@ function Successor() {
     }
 
     const getScale = async (address: string) => {
-      const tokenMint = await getTestament(address).methods.token().call();
+      const testament = getTestament(address);
+      const tokenMint = await testament.methods.token().call();
       const token = getERC20(tokenMint);
       const decimals = await token.methods.decimals().call();
       return 10**decimals;
@@ -72,8 +76,10 @@ function Successor() {
 
     const contracts = await Promise.all(
       _.uniq(contractsList).map(async (address) => ({
+          address,
           name: await factory.methods.contractNames(address).call(),
           volume: await getTestament(address).methods.totalVolume().call() / await getScale(address),
+          isReleaseAvailible: await  getTestament(address).methods.isFundsReleaseAvailible().call(),
           isValid: await getTestament(address).methods
             .successors(
               await getKey(address, account || '')
@@ -88,8 +94,25 @@ function Successor() {
     return contracts.filter(contract => contract.isValid);
   }
 
+  const claimShare = async (address: string) => {
+    const testament = getTestament(address);
+
+    await testament.methods.claimHeritage().send({
+      from: account
+    });
+  }
+
+  const showActions = (contract: ContractData) => {
+    if (contract.isReleaseAvailible) {
+      return (<Button size="small" onClick={() => claimShare(contract.address)}>Claim share</Button>)
+    } else {
+      return (<div>You cannot claim funds yet</div>)
+    }
+  }
+
   useEffect(() => {
     getContracts().then(contracts => setAllContracts(contracts));
+
   }, []);
 
 
@@ -116,7 +139,7 @@ function Successor() {
 
               </CardContent>
               <CardActions>
-                <Button size="small">Claim share</Button>
+                { showActions(contract) }
               </CardActions>
             </Card>
           </Grid>
