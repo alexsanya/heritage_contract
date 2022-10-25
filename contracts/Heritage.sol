@@ -38,6 +38,7 @@ contract Heritage {
   event RegisterSuccessor(address successor, bool isRegistered);
   event InvalidSuccessor(address successor);
   event SetSuccessors();
+  event Destruction();
   event SuccessorClaimingShare(address successor, uint share);
   event ReleasingFunds(address dispenser, uint amount, uint balance);
   event FundsTransfered(address successor, uint amount);
@@ -56,6 +57,14 @@ contract Heritage {
   modifier onlyOwner {
     require(msg.sender == owner);
     _;
+  }
+
+  function kill() public onlyOwner {
+    uint256 erc20balance = token.balanceOf(address(this));
+    bool sent = token.transfer(owner, erc20balance);
+    require(sent, "Failed to sent tokens");
+    selfdestruct(owner);
+    emit Destruction();
   }
 
   function deposit() public payable onlyOwner {

@@ -56,9 +56,9 @@ function Owner() {
 
     const contractDetails = await Promise.all(
       contractAddresses.map(address =>
-        getContractDetails(address)
+        getContractDetails(address).catch(() => false)
       )
-    );
+    ).then(list => list.filter(details => details) as ContractData[]);
 
     return contractDetails;
   }
@@ -80,6 +80,16 @@ function Owner() {
 
     console.log('Reseting timer...');
   }
+
+  const deleteTestament = async (address: string) => {
+    const testament = getTestament(address);
+    
+    const result = await testament.methods.kill().send({
+      from: account
+    });
+
+    console.log('Removing testament...');
+  } 
 
   const getEditLink = (address: string) => `/edit-contract/${address}`;
 
@@ -111,6 +121,7 @@ function Owner() {
                   <Button size="small">Edit</Button>
                 </Link>
                 <Button size="small" onClick={() => resetTimer(contract.address)}>Reset timer</Button>
+                <Button size="small" color="error" onClick={() => deleteTestament(contract.address)}>Delete testament</Button>
               </CardActions>
             </Card>
           </Grid>

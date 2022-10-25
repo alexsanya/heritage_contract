@@ -88,10 +88,10 @@ function Successor() {
                 return new BN(data.wallet).eq(new BN(account || ''));
               })
         })
-      )
-    );
+      ).map(promise => promise.catch(() => false))
+    )
 
-    return contracts.filter(contract => contract.isValid);
+    return contracts.filter(contract => contract && (contract as ContractData).isValid) as ContractData[];
   }
 
   const claimShare = async (address: string) => {
