@@ -131,7 +131,7 @@ function EditContract() {
     setSuccessors({
       ...updatedValues,
       [name]: {
-        ...successors[name],
+        ...updatedValues[name],
         limit
       }
     });

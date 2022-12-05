@@ -1,6 +1,7 @@
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import { useNavigate } from "react-router-dom";
 
 import factory from './factory';
 import { MetamaskContext } from './ConnectWallet';
@@ -14,6 +15,7 @@ function NewContract() {
   const [contractName, setContractName] = useState('');
   const [tokenAddress, setTokenAddress] = useState('');
   const [releasePeriod, setReleasePeriod] = useState('');
+  const navigate = useNavigate();
 
   const account = useContext(MetamaskContext);
 
@@ -35,8 +37,7 @@ function NewContract() {
     const result = await factory.methods.create(contractName, tokenAddress, parseInt(releasePeriod)*SECONDS_IN_HOUR).send({
       from: account
     });
-    console.log(result);
-    console.log({ contractName, tokenAddress, releasePeriod });
+    navigate('/owner');
   }
 
   return (

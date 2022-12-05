@@ -38,7 +38,6 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove
           value={successors[name].share}
           step={1}
           onChange={(event: Event, newValue: number | number[]) => handleChange(name, newValue, successors[name].limit)}
-          marks
           min={0}
           max={100}
           valueLabelDisplay="on"

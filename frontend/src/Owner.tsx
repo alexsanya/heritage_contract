@@ -5,6 +5,7 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { Link } from "react-router-dom";
+import web3 from './web3';
 import { MetamaskContext } from "./ConnectWallet";
 import React, { useContext, useState, useEffect } from "react";
 
@@ -17,7 +18,7 @@ interface ContractData {
   name: string;
   numberOfSuccessors: number;
   releasePeriod: number;
-  lastPingTime: number;
+  daysSinceLastPing: number;
   balance: number;
 }
 
@@ -37,21 +38,34 @@ function Owner() {
       )
     );
 
+    const getDaysSinceLastPing = async (lastPing: number): Promise<number> => {
+      const { timestamp } =  await web3.eth.getBlock("latest") as { timestamp: number };
+
+      return Math.round((timestamp - lastPing) / SECONDS_IN_DAY);
+    }
+
     const getContractDetails: (address: string) => Promise<ContractData> = async address => {
       const testament = getTestament(address);
       const tokenMint = await testament.methods.token().call();
-      console.log(`token mint: ${tokenMint}`, tokenMint);
+      console.log(`token mint: ${tokenMint}`);
       const token = getERC20(tokenMint);
       const [ name, numberOfSuccessors, releasePeriod, lastPingTime, rawBalance, decimals ] = await Promise.all([
         factory.methods.contractNames(address).call(),
         testament.methods.numberOfSuccessors().call(),
         testament.methods.maxPeriodOfSilense().call(),
-        testament.methods.getCountdownValue().call(),
+        testament.methods.getCountdownValue().call({from: account }),
         testament.methods.totalVolume().call(),
         token.methods.decimals().call()
-      ]);
+      ].map((p, index: number) => p.catch((err: any) => console.error(`Error at index ${index}`, err))));
 
-      return { address, name, numberOfSuccessors, releasePeriod, lastPingTime, balance: rawBalance / 10**decimals };
+      return { 
+        address,
+        name,
+        numberOfSuccessors,
+        releasePeriod,
+        daysSinceLastPing: await getDaysSinceLastPing(lastPingTime),
+        balance: rawBalance / 10**decimals 
+      };
     }
 
     const contractDetails = await Promise.all(
@@ -67,9 +81,6 @@ function Owner() {
     getContracts().then(contracts => setAllContracts(contracts));
   }, []);
 
-  const getDaysSinceLastPing = (lastPing: number): number => {
-    return Math.round((Date.now() - lastPing * 1e3) / SECONDS_IN_DAY);
-  }
 
   const resetTimer = async (address: string) => {
     const testament = getTestament(address);
@@ -110,7 +121,7 @@ function Owner() {
                   successors: { contract.numberOfSuccessors }
                 </Typography>
                 <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                  days until release: { contract.releasePeriod / SECONDS_IN_DAY - getDaysSinceLastPing(contract.lastPingTime)}
+                  days until release: { contract.releasePeriod / SECONDS_IN_DAY - contract.daysSinceLastPing}
                 </Typography>
                 <Typography sx={{ mb: 1.5 }} color="text.secondary">
                   balance: { contract.balance }
