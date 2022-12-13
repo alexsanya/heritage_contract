@@ -12,17 +12,9 @@ import React, { useContext, useState, useEffect } from "react";
 import factory from './factory';
 import getTestament from './getTestament';
 import getERC20 from './getERC20';
+import {ContractData, ContractCard, SECONDS_IN_DAY} from './contract-card';
 
-interface ContractData {
-  address: string;
-  name: string;
-  numberOfSuccessors: number;
-  releasePeriod: number;
-  daysSinceLastPing: number;
-  balance: number;
-}
 
-const SECONDS_IN_DAY = 24*3600;
 
 function Owner() {
 
@@ -60,6 +52,7 @@ function Owner() {
 
       return { 
         address,
+        token: tokenMint,
         name,
         numberOfSuccessors,
         releasePeriod,
@@ -106,55 +99,26 @@ function Owner() {
 
   const ExistingContracts: React.FC<{ contracts: ContractData[] }> = ({ contracts }) => {
     return (
-      <>
+      <div className="flex flex-col items-center justify-center h-full font-sans">
         {contracts.map(contract => (
-          <Grid item xs={12}>
-            <Card sx={{ minWidth: 275 }}>
-              <CardContent>
-                <Typography variant="h5" component="div">
-                  { contract.name }
-                </Typography>
-                <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                  address: { contract.address }
-                </Typography>
-                <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                  successors: { contract.numberOfSuccessors }
-                </Typography>
-                <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                  days until release: { contract.releasePeriod / SECONDS_IN_DAY - contract.daysSinceLastPing}
-                </Typography>
-                <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                  balance: { contract.balance }
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Link to={ getEditLink(contract.address) }>
-                  <Button size="small">Edit</Button>
-                </Link>
-                <Button size="small" onClick={() => resetTimer(contract.address)}>Reset timer</Button>
-                <Button size="small" color="error" onClick={() => deleteTestament(contract.address)}>Delete testament</Button>
-              </CardActions>
-            </Card>
-          </Grid>
+          <ContractCard contract={contract} />
         ))} 
-      </>
+        <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
+          <img src="/newContract.svg" className="w-10" />
+          <div className="text-xl">Create new</div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Grid
-      container
-      rowSpacing={1}
-      direction="column"
-      alignItems="center"
-      justifyContent="center"
-      style={{ minHeight: '100vh' }}
-    >
+    <>
+      <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
+        <img src="/back.svg" className="w-10" />
+        <div className="text-xl">Back</div>
+      </div>
       <ExistingContracts contracts={allContracts}/>
-      <Grid item xs={12}>
-          <Link to="/newContract"><Button variant="outlined">Create new testament</Button></Link>
-      </Grid>
-    </Grid>
+    </>
   );
 
 }
