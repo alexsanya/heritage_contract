@@ -16,13 +16,13 @@ interface TokenOption {
   active?: boolean;
 }
 
-const TokenSelector: React.FC<{ label: string, items: TokenOption[], onChange: (value: string) => void }> = ({ label, items, onChange }) =>  {
+const OptionsSelector: React.FC<{ label: string, items: TokenOption[], onChange: (value: string) => void }> = ({ label, items, onChange }) =>  {
   const [tokenAddress, setTokenAddress] = useState('');
   const setActive = (value: string) => {
     console.log('Setting token: ', value);
     onChange(value);
   };
-  const TokenControl: React.FC<{ item: TokenOption }> = ({ item }) => {
+  const OptionControl: React.FC<{ item: TokenOption }> = ({ item }) => {
     const getClassName = (isActive: boolean) => isActive ?
       "cursor-pointer rounded-full bg-yellow-100 drop-shadow-md mx-2 px-3 py-1 border-2 border-yellow-500" :
       "cursor-pointer rounded-full bg-slate-100 drop-shadow-md mx-2 px-3 py-1"
@@ -34,7 +34,7 @@ const TokenSelector: React.FC<{ label: string, items: TokenOption[], onChange: (
     <div className="flex flex-row items-center">
       <div className="w-40">{ label }</div>
       {
-        items.map(item => (<TokenControl item={item} />))
+        items.map(item => (<OptionControl item={item} />))
       }
       <div className="rounded-full bg-slate-100 drop-shadow-md mx-2 p-2 ">Custom...</div>
     </div>
@@ -132,8 +132,8 @@ function NewContract() {
               onChange={onContractNameChange} 
             />
           </div>
-          <TokenSelector label="Select token:" items={tokenOptions} onChange={setActiveToken}/>
-          <TokenSelector label="SelectPeriod:" items={periodOptions} onChange={setActivePeriod}/>
+          <OptionsSelector label="Select token:" items={tokenOptions} onChange={setActiveToken}/>
+          <OptionsSelector label="SelectPeriod:" items={periodOptions} onChange={setActivePeriod}/>
           <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
             <img src="/save.svg" className="w-8" />
             <div className="text-l" onClick={createContract}>Create</div>

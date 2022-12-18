@@ -103,10 +103,10 @@ function Owner() {
         {contracts.map(contract => (
           <ContractCard contract={contract} />
         ))} 
-        <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
+        <a href="/newContract" className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
           <img src="/newContract.svg" className="w-10" />
           <div className="text-xl">Create new</div>
-        </div>
+        </a>
       </div>
     );
   }
