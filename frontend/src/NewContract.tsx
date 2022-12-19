@@ -14,13 +14,20 @@ interface TokenOption {
   name: string;
   value: string;
   active?: boolean;
+  isCustom?: boolean;
 }
 
 const OptionsSelector: React.FC<{ label: string, items: TokenOption[], onChange: (value: string) => void }> = ({ label, items, onChange }) =>  {
   const [tokenAddress, setTokenAddress] = useState('');
+  const [customValue, setCustomValue] = useState('');
+  const [displayCustomInput, setDisplayCustomInput] = useState(false);
   const setActive = (value: string) => {
     console.log('Setting token: ', value);
+    setDisplayCustomInput(false);
     onChange(value);
+  };
+  const onCustomValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomValue(event.target.value);
   };
   const OptionControl: React.FC<{ item: TokenOption }> = ({ item }) => {
     const getClassName = (isActive: boolean) => isActive ?
@@ -30,13 +37,54 @@ const OptionsSelector: React.FC<{ label: string, items: TokenOption[], onChange:
       <div className={getClassName(!!item.active)} onClick={() => setActive(item.value)}>{ item.name }</div>
     );
   }
+  const addCustomValue = () => {
+    
+    console.log('Set button click');
+
+    items.forEach(item => {
+      item.active = false;
+    });
+    const customItem = items.find(item => item.isCustom); 
+    if (!customItem) {
+      items.push({
+        name: customValue,
+        value: customValue,
+        active: true,
+        isCustom: true
+      });
+    } else {
+      customItem.active = true;
+      customItem.name = customValue;
+      customItem.value = customValue;
+    }
+    setDisplayCustomInput(false);
+  }
   return (
     <div className="flex flex-row items-center">
       <div className="w-40">{ label }</div>
       {
         items.map(item => (<OptionControl item={item} />))
       }
-      <div className="rounded-full bg-slate-100 drop-shadow-md mx-2 p-2 ">Custom...</div>
+      {
+        !displayCustomInput && <>
+          <div className="rounded-full bg-slate-100 drop-shadow-md mx-2 p-2 cursor-pointer" onClick={() => setDisplayCustomInput(true)}>
+            Custom...
+          </div>
+        </>
+      }
+      {
+        displayCustomInput && <>
+          <input
+            type="text" 
+            className="border border-solid divide-slate-300 p-1 rounded-md" 
+            placeholder="enter token address"
+            value={customValue}
+            onChange={onCustomValueChange} 
+          />
+          <div className="cursor-pointer rounded-md bg-slate-100 drop-shadow-md mx-1 px-3 py-1" onClick={addCustomValue}>Set</div>
+          <div className="cursor-pointer rounded-md bg-slate-100 drop-shadow-md mx-1 px-3 py-1" onClick={() => setDisplayCustomInput(false)}>Cancel</div>
+        </>
+      }
     </div>
   );
 }
