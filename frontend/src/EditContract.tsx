@@ -14,6 +14,7 @@ import { SuccessorsList, SuccessorConstraints } from './SuccessorsList';
 import getTestament from './getTestament';
 import factory from './factory';
 import getERC20 from './getERC20';
+import { SECONDS_IN_DAY } from './contract-card';
 
 
 function EditContract() {
@@ -23,8 +24,10 @@ function EditContract() {
 
   const [testament, setTestament] = useState<any>();
   const [token, setToken] = useState<any>();
+  const [lockingPeriod, setLockingPeriod] = useState(0);
   const [decimals, setDecimals] =  useState(0);
   const [contractName, setContractName] = useState('');
+  const [contractTotalValue, setContractTotalValue] = useState(0);
   const [succesorAddress, setSuccesorAddress] = useState('');
   const [successorName, setSuccessorName] = useState('');
   const [showAddressFoundLabel, setShowAddressFoundLabel] = useState(false);
@@ -39,11 +42,15 @@ function EditContract() {
       const testament = getTestament(address);
       const contractName = await factory.methods.contractNames(address).call();
       const tokenMint = await testament.methods.token().call();
+      const releasePeriod = await testament.methods.maxPeriodOfSilense().call({from: account });
       const token = getERC20(tokenMint);
       const decimals = await token.methods.decimals().call();
+      const totalValue = await token.methods.balanceOf(address).call();
 
-      setTestament(testament);
       setToken(token);
+      setTestament(testament);
+      setContractTotalValue(new BN(totalValue).div(new BN(10**decimals)).toNumber());
+      setLockingPeriod(releasePeriod /SECONDS_IN_DAY);
       setDecimals(decimals);
       setContractName(contractName);
 
@@ -195,65 +202,59 @@ function EditContract() {
 
   return (
     <>
-      <Grid container spacing={2}>
-        <Grid item xs={12}> 
-          <Grid display="flex" justifyContent="center" alignItems="center"> 
-            <h1>{contractName}</h1>
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <SuccessorsList
-            successors={successors}
-            onChange={updateSuccessors}
-            onRemove={onRemove}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <Grid display="flex" justifyContent="center" alignItems="center"> 
-            <Button onClick={updateShares}>Update shares</Button>
-          </Grid>
-        </Grid>
-        <Grid item xs={6}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                id="successor-address"
-                label="input address"
-                variant="standard"
-                value={succesorAddress}
-                onChange={onSuccessorAddressChange}
-              />
-              <Button onClick={checkIfAddressRegistered}>Check</Button>
-            </Grid>
-            <Grid item xs={12}>
-              { showAddressFoundLabel && (<Chip label={succesorAddress} color="success" />) }
-              { showNotFoundLabel && (<Chip label="Address is not registered" color="warning" />) }
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                id="successor-name"
-                label="input name"
-                variant="standard"
-                value={successorName}
-                onChange={onSuccessorNameChange}
-              />
-              <Button disabled={!showAddressFoundLabel || !successorName.length} onClick={addSuccessor}>Add</Button>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={6}>
-            <TextField
-              id="amount"
-              label="amount"
-              variant="standard"
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-              value={amount}
-              onChange={onFundsAmountChange}
-            />
-            <Button onClick={addFunds}>Add funds</Button>
-            <Button onClick={withdrawFunds}>Withdraw funds</Button>
-        </Grid>
-      </Grid>
+      <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
+        <img src="/back.svg" className="w-10" />
+        <div className="text-xl">Back</div>
+      </div>
+      <div className="flex flex-col h-full font-sans text-2xl">
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="rounded-lg m-3 p-3">
+              <div className="flex flex-row justify-between items-center">
+                <div className="text-left mr-5 flex flex-col gap-y-5 italic">
+                  <div>Volume</div>
+                  <div>Locking period</div>
+                </div>
+                <div className="text-right flex flex-col gap-y-5">
+                  <div>{ contractTotalValue }</div>
+                  <div>{ lockingPeriod } days</div>
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex flex-row px-1 items-center">
+                    <img src="/topup.png" className="w-10 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 m-1" />
+                    <img src="/withdraw.png" className="w-10 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 m-1" />
+                  </div>
+                  <img src="/edit.svg" className="w-10 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 m-1" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-row">
+            <div className="basis-1/2">
+
+              <div className="flex flex-col gap-y-4">
+                <SuccessorsList
+                  successors={successors}
+                  onChange={updateSuccessors}
+                  onRemove={onRemove}
+                />
+              </div>
+
+              <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
+                <img src="/person.svg" className="w-4" />
+                <div className="text-base">add...</div>
+              </div>
+
+              <div className="grid justify-items-center">
+                <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
+                  <img src="/pen.svg" className="w-10" />
+                  <div className="text-xl">Sign</div>
+                </div>
+              </div>
+            </div>
+            <div className="basis-1/2 grid justify-items-center">
+            </div>
+          </div>
+      </div>
     </>
   );
 }

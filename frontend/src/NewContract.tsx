@@ -73,7 +73,7 @@ const OptionsSelector: React.FC<{ label: string, items: TokenOption[], onChange:
         </>
       }
       {
-        displayCustomInput && <>
+        displayCustomInput && <div className="flex flex-row">
           <input
             type="text" 
             className="border border-solid divide-slate-300 p-1 rounded-md" 
@@ -83,7 +83,7 @@ const OptionsSelector: React.FC<{ label: string, items: TokenOption[], onChange:
           />
           <div className="cursor-pointer rounded-md bg-slate-100 drop-shadow-md mx-1 px-3 py-1" onClick={addCustomValue}>Set</div>
           <div className="cursor-pointer rounded-md bg-slate-100 drop-shadow-md mx-1 px-3 py-1" onClick={() => setDisplayCustomInput(false)}>Cancel</div>
-        </>
+        </div>
       }
     </div>
   );
