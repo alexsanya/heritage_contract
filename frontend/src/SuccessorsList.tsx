@@ -5,6 +5,8 @@ import TextField from '@mui/material/TextField';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 
+import ValueEdit from './ValueEdit';
+
 export interface SuccessorConstraints {
   limit: number;
   share: number;
@@ -20,7 +22,6 @@ type Props = {
 export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove }) => {
   const successorsNames =  Object.keys(successors);
   const absorber = successorsNames[successorsNames.length - 1];
-  const [displayCustomInput, setDisplayCustomInput] = useState<{[name: string]: boolean}>({});
 
 
   const limits = Object.keys(successors).reduce((acc, key) => ({...acc, [key]: successors[key].limit}), {})
@@ -30,7 +31,6 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove
   const handleChange = (name: string, newValue: number | number[], newLimit: number) => {
     console.log(name, newValue);
     console.log(name, newLimit);
-    setDisplayCustomInput({});
     onChange(name, newValue as number, newLimit);
   };
 
@@ -58,6 +58,16 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove
     ));
   }
 
+  const EditButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+    return (
+      <img
+        src="/edit.svg"
+        className="w-8 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 my-2"
+        onClick={onClick}
+      />
+    );
+  }
+
 
   return (
     <div className="flex flex-row items-center italic">
@@ -67,37 +77,16 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove
       <div className="text-right flex-none flex flex-col gap-y-3 mr-1">
         {getSuccessorsLimits()}
       </div>
-      <div className="flex flex-none flex-col">
-        {successorsNames.map(name => (
-          <img
-            src="/edit.svg"
-            className="w-8 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 my-2"
-            onClick={() => setDisplayCustomInput({[name]: true})}
-          />
-        ))}
-      </div>
       <div className="flex flex-none flex-col max-w-xs">
         {successorsNames.map(name => {
-          const blockStyle = (displayCustomInput[name] ? '' : 'invisible ') + "flex flex-row";
-          return <div className={blockStyle}>
-            <input
-              type="text" 
-              className="border border-solid divide-slate-300 p-1 rounded-md max-w-[150px]"
-              placeholder="monthlyLimit"
-              value={monthlyLimits[name]}
-              onChange={event => setMonthlyLimits({...monthlyLimits, [name]: +event.target.value})} 
+          return <div className="flex flex-row">
+            <ValueEdit
+              initial={successors[name].limit}
+              commit="Set"
+              cancel="Cancel"
+              onCommit={value => handleChange(name, successors[name].share, value)}
+              Trigger={EditButton}
             />
-            <div
-              className="cursor-pointer rounded-md bg-slate-100 drop-shadow-md mx-1 px-3 py-1"
-              onClick={event => handleChange(name, successors[name].share, monthlyLimits[name])}
-            >
-              Set
-            </div>
-            <div
-              className="cursor-pointer rounded-md bg-slate-100 drop-shadow-md mx-1 px-3 py-1"
-              onClick={() => setDisplayCustomInput({...displayCustomInput, [name]: false})}>
-              Cancel
-            </div>
           </div>
       })
       }

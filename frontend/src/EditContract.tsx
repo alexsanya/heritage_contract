@@ -9,6 +9,7 @@ import Stack from '@mui/material/Stack';
 import web3 from './web3';
 import BN from 'bn.js';
 import { MetamaskContext } from './ConnectWallet';
+import ValueEdit from './ValueEdit';
 import { SuccessorsList, SuccessorConstraints } from './SuccessorsList';
 
 import getTestament from './getTestament';
@@ -20,7 +21,6 @@ import { SECONDS_IN_DAY } from './contract-card';
 function EditContract() {
   const account = useContext(MetamaskContext);
   const { address } = useParams();
-  const [amount, setAmount] = useState('0');
 
   const [testament, setTestament] = useState<any>();
   const [token, setToken] = useState<any>();
@@ -86,21 +86,20 @@ function EditContract() {
     })();
   }, []);
 
-  
-  const onFundsAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(event.target.value);
-  }
-
-  const addFunds = async () => {
+  const addFunds = async (amount: number) => {
     console.log('token', token);
 
-    const value = parseFloat(amount) * 10**decimals;
+    const value = amount * 10**decimals;
     await token.methods.approve(address, value).send({ from: account });
     await testament.methods.depositTokens(value).send({ from: account });
   }
 
-  const withdrawFunds = async () => {
-    const value = parseFloat(amount) * 10**decimals;
+  const updateMaxPeriodOfSilence = async (period: number) => {
+    await testament.methods.updateMaxPeriodOfSilence(period * SECONDS_IN_DAY).send({ from: account });
+  }
+
+  const withdrawFunds = async (amount: number) => {
+    const value = amount * 10**decimals;
     await testament.methods.withdrawTokens(value).send({ from: account });
   }
 
@@ -200,6 +199,36 @@ function EditContract() {
     }), {}));
   }
 
+  const TopupButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+    return (
+      <img
+        src="/topup.png"
+        className="w-10 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 m-1"
+        onClick={onClick}
+      />
+    );
+  }
+
+  const WithdrawButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+    return (
+      <img
+        src="/withdraw.png"
+        className="w-10 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 m-1"
+        onClick={onClick}
+      />
+    );
+  }
+
+  const EditButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+    return (
+      <img
+        src="/edit.svg"
+        className="w-10 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 m-1"
+        onClick={onClick}
+      />
+    );
+  }
+
   return (
     <>
       <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
@@ -220,11 +249,33 @@ function EditContract() {
                 </div>
                 <div className="flex flex-col">
                   <div className="flex flex-row px-1 items-center">
-                    <img src="/topup.png" className="w-10 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 m-1" />
-                    <img src="/withdraw.png" className="w-10 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 m-1" />
+                    <ValueEdit
+                      initial={0}
+                      commit="Topup"
+                      cancel="Cancel"
+                      onCommit={value => addFunds(value)}
+                      Trigger={TopupButton}
+                    />
+                    <ValueEdit
+                      initial={0}
+                      commit="Withdraw"
+                      cancel="Cancel"
+                      onCommit={value => withdrawFunds(value)}
+                      Trigger={WithdrawButton}
+                    />
                   </div>
-                  <img src="/edit.svg" className="w-10 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 m-1" />
+                  <ValueEdit
+                    initial={ lockingPeriod }
+                    commit="Change"
+                    cancel="Cancel"
+                    onCommit={value => updateMaxPeriodOfSilence(value)}
+                    Trigger={EditButton}
+                  />
+
                 </div>
+                <div className="flex flex-col">
+                </div>
+
               </div>
             </div>
           </div>
