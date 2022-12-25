@@ -77,7 +77,7 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove
       <div className="text-right flex-none flex flex-col gap-y-3 mr-1">
         {getSuccessorsLimits()}
       </div>
-      <div className="flex flex-none flex-col max-w-xs">
+      <div className="flex flex-none flex-col gap-y-1 max-w-xs">
         {successorsNames.map(name => {
           return <div className="flex flex-row">
             <ValueEdit

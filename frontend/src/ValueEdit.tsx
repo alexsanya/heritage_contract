@@ -18,14 +18,14 @@ const ValueEdit: React.FC<IValueEditProps> = ({ commit, cancel, initial, onCommi
   };
 
   return (
-    <div className="flex flex-row px-1 m-3 gap-4 items-center">
+    <div className="flex flex-row px-1 mx-1 items-center">
       <div className = {(shown ? 'invisible' : '')}>
         <Trigger onClick={() => setShown(true)}/>
       </div>
       { shown && (<>
         <input
           type="text" 
-          className="border border-solid divide-slate-300 p-1 rounded-md"
+          className="border border-solid divide-slate-300 p-1 rounded-md max-w-[150px]"
           placeholder="enter token address"
           value={value}
           onChange={event => setValue(+event.target.value)} 

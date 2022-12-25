@@ -10,6 +10,7 @@ import web3 from './web3';
 import BN from 'bn.js';
 import { MetamaskContext } from './ConnectWallet';
 import ValueEdit from './ValueEdit';
+import SharesChart from './SharesChart';
 import { SuccessorsList, SuccessorConstraints } from './SuccessorsList';
 
 import getTestament from './getTestament';
@@ -266,7 +267,7 @@ function EditContract() {
                   </div>
                   <ValueEdit
                     initial={ lockingPeriod }
-                    commit="Change"
+                    commit="Change" 
                     cancel="Cancel"
                     onCommit={value => updateMaxPeriodOfSilence(value)}
                     Trigger={EditButton}
@@ -298,11 +299,12 @@ function EditContract() {
               <div className="grid justify-items-center">
                 <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
                   <img src="/pen.svg" className="w-10" />
-                  <div className="text-xl">Sign</div>
+                  <div className="text-xl" onClick={updateShares}>Sign</div>
                 </div>
               </div>
             </div>
             <div className="basis-1/2 grid justify-items-center">
+              <SharesChart successors={successors} />
             </div>
           </div>
       </div>
