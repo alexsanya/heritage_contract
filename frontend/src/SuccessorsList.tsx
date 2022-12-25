@@ -5,7 +5,7 @@ import TextField from '@mui/material/TextField';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 
-import ValueEdit from './ValueEdit';
+import { ValueEdit } from './ValueEdit';
 
 export interface SuccessorConstraints {
   limit: number;
@@ -84,7 +84,8 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove
               initial={successors[name].limit}
               commit="Set"
               cancel="Cancel"
-              onCommit={value => handleChange(name, successors[name].share, value)}
+              placeholder="amount"
+              onCommit={value => handleChange(name, successors[name].share, +value)}
               Trigger={EditButton}
             />
           </div>

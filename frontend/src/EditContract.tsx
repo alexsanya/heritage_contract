@@ -9,8 +9,9 @@ import Stack from '@mui/material/Stack';
 import web3 from './web3';
 import BN from 'bn.js';
 import { MetamaskContext } from './ConnectWallet';
-import ValueEdit from './ValueEdit';
+import { ValueEdit } from './ValueEdit';
 import SharesChart from './SharesChart';
+import NewHeirWidget from './NewHeirWidget';
 import { SuccessorsList, SuccessorConstraints } from './SuccessorsList';
 
 import getTestament from './getTestament';
@@ -29,10 +30,9 @@ function EditContract() {
   const [decimals, setDecimals] =  useState(0);
   const [contractName, setContractName] = useState('');
   const [contractTotalValue, setContractTotalValue] = useState(0);
-  const [succesorAddress, setSuccesorAddress] = useState('');
-  const [successorName, setSuccessorName] = useState('');
   const [showAddressFoundLabel, setShowAddressFoundLabel] = useState(false);
   const [showNotFoundLabel, setShowNotFoundLabel] = useState(false);
+  const [newHeirDialog, setNewHeirDialog] = useState(false);
   const [successors, setSuccessors] = useState<{ [name: string]: SuccessorConstraints }>({});
 
   useEffect(() => {
@@ -104,16 +104,6 @@ function EditContract() {
     await testament.methods.withdrawTokens(value).send({ from: account });
   }
 
-  const onSuccessorAddressChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setShowAddressFoundLabel(false);
-    setShowNotFoundLabel(false);
-    setSuccesorAddress(event.target.value);
-  }
-
-  const onSuccessorNameChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSuccessorName(event.target.value);
-  }
-
   const updateSuccessors = (name: string, share: number, limit: number) => {
   console.log(`Limit is ${limit}`);
     const successorsNames =  Object.keys(successors);
@@ -144,31 +134,17 @@ function EditContract() {
     });
   }
 
-  const checkIfAddressRegistered = async () => {
-    setShowAddressFoundLabel(false);
-    setShowNotFoundLabel(false);
-    const isRegistered = await testament.methods.potentialSuccessors(succesorAddress).call();
-    if (isRegistered) {
-      setShowAddressFoundLabel(true);
-    } else {
-      setShowNotFoundLabel(true);
-    }
-  }
   
-  const addSuccessor = async () => {
+  const addSuccessor = async (name: string, address: string) => {
     const share = (Object.keys(successors).length) > 0 ? 0 : 100;
     setSuccessors({
       ...successors,
-      [successorName]: {
-        wallet: succesorAddress,
+      [name]: {
+        wallet: address,
         limit: 1e10,
         share    
       }
     });
-    setSuccessorName('');
-    setSuccesorAddress('');
-    setShowAddressFoundLabel(false);
-    setShowNotFoundLabel(false);
   }
 
   const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -254,22 +230,25 @@ function EditContract() {
                       initial={0}
                       commit="Topup"
                       cancel="Cancel"
-                      onCommit={value => addFunds(value)}
+                      placeholder="Amount"
+                      onCommit={value => addFunds(+value)}
                       Trigger={TopupButton}
                     />
                     <ValueEdit
                       initial={0}
                       commit="Withdraw"
                       cancel="Cancel"
-                      onCommit={value => withdrawFunds(value)}
+                      placeholder="Amount"
+                      onCommit={value => withdrawFunds(+value)}
                       Trigger={WithdrawButton}
                     />
                   </div>
                   <ValueEdit
                     initial={ lockingPeriod }
+                    placeholder="Days"
                     commit="Change" 
                     cancel="Cancel"
-                    onCommit={value => updateMaxPeriodOfSilence(value)}
+                    onCommit={value => updateMaxPeriodOfSilence(+value)}
                     Trigger={EditButton}
                   />
 
@@ -280,8 +259,8 @@ function EditContract() {
               </div>
             </div>
           </div>
-          <div className="flex flex-row">
-            <div className="basis-1/2">
+          <div className="flex flex-row items-center">
+            <div className="basis-2/3 p-4">
 
               <div className="flex flex-col gap-y-4">
                 <SuccessorsList
@@ -291,10 +270,7 @@ function EditContract() {
                 />
               </div>
 
-              <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
-                <img src="/person.svg" className="w-4" />
-                <div className="text-base">add...</div>
-              </div>
+              <NewHeirWidget onAdd={addSuccessor}/>
 
               <div className="grid justify-items-center">
                 <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
@@ -303,7 +279,7 @@ function EditContract() {
                 </div>
               </div>
             </div>
-            <div className="basis-1/2 grid justify-items-center">
+            <div className="basis-1/3 grid justify-items-center">
               <SharesChart successors={successors} />
             </div>
           </div>
