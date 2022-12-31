@@ -1,3 +1,7 @@
+import { useContext } from "react";
+import { MetamaskContext } from "./ConnectWallet";
+import getTestament from './getTestament';
+
 export const SECONDS_IN_DAY = 24*3600;
 
 export interface ContractData {
@@ -10,8 +14,32 @@ export interface ContractData {
   balance: number;
 }
 
+const resetTimer = async (account: any, address: string) => {
+  const testament = getTestament(address);
+
+  const result = await testament.methods.resetCountdownTimer().send({
+    from: account
+  });
+
+  console.log('Reseting timer...');
+}
+
+
+const deleteTestament = async (account: any, address: string) => {
+  const testament = getTestament(address);
+  
+  const result = await testament.methods.kill().send({
+    from: account
+  });
+
+  console.log('Removing testament...');
+} 
 
 export const ContractCard: React.FC<{ contract: ContractData }> = ({ contract }) => {
+
+  const account = useContext(MetamaskContext);
+
+
   const persentage = Math.round((contract.releasePeriod- contract.daysSinceLastPing*SECONDS_IN_DAY) / contract.releasePeriod);
 
   const chartStyle = {
@@ -57,9 +85,23 @@ export const ContractCard: React.FC<{ contract: ContractData }> = ({ contract })
               </div>
             </div>
             <div className="flex flex-row items-center justify-between pt-3 px-1">
-                <img src="/reset.svg" className="w-8 cursor-pointer" data-tooltip-target="tooltip-btn-reset" data-tooltip-placement="top" />
-                <img src="/edit.svg" className="w-8 cursor-pointer" data-tooltip-target="tooltip-btn-edit" data-tooltip-placement="top" />
-                <img src="/delete.svg" className="w-8 cursor-pointer" data-tooltip-target="tooltip-btn-delete" data-tooltip-placement="top" />
+                <img
+                  src="/reset.svg"
+                  className="w-8 cursor-pointer"
+                  data-tooltip-target="tooltip-btn-reset"
+                  data-tooltip-placement="top"
+                  onClick={() => resetTimer(account, contract.address)}
+                />
+                <a href={`/edit-contract/${contract.address}`} data-tooltip-target="tooltip-btn-edit" data-tooltip-placement="top">
+                  <img src="/edit.svg" className="w-8 cursor-pointer" />
+                </a>
+                <img
+                  src="/delete.svg"
+                  className="w-8 cursor-pointer"
+                  data-tooltip-target="tooltip-btn-delete"
+                  data-tooltip-placement="top"
+                  onClick={() => deleteTestament(account, contract.address)}
+                />
                 <div id="tooltip-btn-reset" role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">Reset timer</div>
                 <div id="tooltip-btn-edit" role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">Edit contract</div>
                 <div id="tooltip-btn-delete" role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">Delete contract</div>

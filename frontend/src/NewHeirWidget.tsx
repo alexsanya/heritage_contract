@@ -66,10 +66,10 @@ const NewHeirWidget: React.FC<INewHeirWidgetProps> = ({ onAdd }) => {
         />
     )}
       { validTag && (<>
-        <div>Valid: ${address as string}</div>
+        <div className="rounded-lg bg-green-700 drop-shadow-md mx-2 my-4 px-3 py-1 text-white w-fit drop-shadow-md">Valid: ${address as string}</div>
         <UserInputs
           shown={true}
-          hide={() => {}}
+          hide={onAddHeirFormShow}
           commit="add"
           cancel="cancel"
           initial=""
@@ -78,7 +78,7 @@ const NewHeirWidget: React.FC<INewHeirWidgetProps> = ({ onAdd }) => {
         />
       </>) }
       { invalidTag && (
-        <div>Invalid: ${address as string}</div>
+        <div className="rounded-full bg-red-700 drop-shadow-md mx-2 my-4 px-3 py-1 text-white w-fit drop-shadow-md">Invalid: ${address as string}</div>
       ) }
   </>);
 }

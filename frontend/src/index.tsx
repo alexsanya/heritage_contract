@@ -24,7 +24,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <Metamask>
     <div className="flex flex-col h-full">
-      <nav className="relative container p-4 bg-slate-800 max-w-full">
+      <nav className="sticky top-0 z-50 container p-4 bg-slate-800 max-w-full">
         <div className="flex items-center justify-center">
           <div className="flex space-x-6 text-white">
             <a href="#" className="px-10">Documentation</a>
@@ -44,7 +44,7 @@ root.render(
           </Routes>
         </BrowserRouter>
       </section>
-      <footer className="bg-very-dark-blue">
+      <footer className="sticky bottom-0 z-50 bg-very-dark-blue">
         <div className="flex sm:items-center justify-center p-4 bg-slate-600">
           <div className="flex flex-col sm:flex-row space-x-6 text-white font-mono">
             <a href="#" className="px-10">source code</a>

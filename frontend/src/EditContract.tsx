@@ -272,7 +272,7 @@ function EditContract() {
 
               <NewHeirWidget onAdd={addSuccessor}/>
 
-              <div className="grid justify-items-center">
+              <div className="grid justify-items-center mt-4">
                 <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
                   <img src="/pen.svg" className="w-10" />
                   <div className="text-xl" onClick={updateShares}>Sign</div>

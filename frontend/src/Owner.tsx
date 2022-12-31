@@ -75,15 +75,6 @@ function Owner() {
   }, []);
 
 
-  const resetTimer = async (address: string) => {
-    const testament = getTestament(address);
-
-    const result = await testament.methods.resetCountdownTimer().send({
-      from: account
-    });
-
-    console.log('Reseting timer...');
-  }
 
   const deleteTestament = async (address: string) => {
     const testament = getTestament(address);
@@ -94,8 +85,6 @@ function Owner() {
 
     console.log('Removing testament...');
   } 
-
-  const getEditLink = (address: string) => `/edit-contract/${address}`;
 
   const ExistingContracts: React.FC<{ contracts: ContractData[] }> = ({ contracts }) => {
     return (
@@ -112,13 +101,13 @@ function Owner() {
   }
 
   return (
-    <>
+    <div className="mb-4">
       <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
         <img src="/back.svg" className="w-10" />
         <div className="text-xl">Back</div>
       </div>
       <ExistingContracts contracts={allContracts}/>
-    </>
+    </div>
   );
 
 }
