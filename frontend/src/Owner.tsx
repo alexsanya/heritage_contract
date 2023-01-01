@@ -76,15 +76,6 @@ function Owner() {
 
 
 
-  const deleteTestament = async (address: string) => {
-    const testament = getTestament(address);
-    
-    const result = await testament.methods.kill().send({
-      from: account
-    });
-
-    console.log('Removing testament...');
-  } 
 
   const ExistingContracts: React.FC<{ contracts: ContractData[] }> = ({ contracts }) => {
     return (
@@ -92,8 +83,10 @@ function Owner() {
         {contracts.map(contract => (
           <ContractCard contract={contract} />
         ))} 
-        <a href="/newContract" className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
-          <img src="/newContract.svg" className="w-10" />
+        <a
+          href="/newContract"
+          className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit text-slate-200 bg-slate-800">
+          <img src="/newContract-white.png" className="w-10" />
           <div className="text-xl">Create new</div>
         </a>
       </div>

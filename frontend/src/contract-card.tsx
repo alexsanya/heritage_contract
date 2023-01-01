@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { MetamaskContext } from "./ConnectWallet";
 import getTestament from './getTestament';
+import ContractAddress from './contract-address';
 
 export const SECONDS_IN_DAY = 24*3600;
 
@@ -40,18 +41,19 @@ export const ContractCard: React.FC<{ contract: ContractData }> = ({ contract })
   const account = useContext(MetamaskContext);
 
 
-  const persentage = Math.round((contract.releasePeriod- contract.daysSinceLastPing*SECONDS_IN_DAY) / contract.releasePeriod);
+  const persentage = Math.round(100*(contract.releasePeriod- contract.daysSinceLastPing*SECONDS_IN_DAY) / contract.releasePeriod);
+  const color =  `hsl(${persentage*1.2}, 100%, 50%)`;
 
   const chartStyle = {
     "--p": persentage,
     "--b": "10px",
-    "--c": "red",
-    color: "red"
+    "--c": color,
+    color
   };
 
   return(
-    <div className="flex flex-col rounded-lg m-5 p-4 bg-slate-200 drop-shadow-lg">
-        <h1 className="text-center text-2xl text-blue-700 font-medium">{contract.name}</h1>
+    <div className="flex flex-col rounded-lg m-5 p-4 bg-slate-800 drop-shadow-lg">
+        <h1 className="text-center text-2xl text-slate-200 font-medium">{contract.name}</h1>
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="rounded-lg bg-slate-100 drop-shadow-lg m-3 p-3 font-mono italic">
             <div className="flex flex-row justify-between">
@@ -63,22 +65,8 @@ export const ContractCard: React.FC<{ contract: ContractData }> = ({ contract })
                 <div>countdown</div>
               </div>
               <div className="text-right leading-8">
-                <div className="flex flex-row">
-                  <div data-tooltip-target="tooltip-contract-address" data-tooltip-placement="top" className="rounded-lg bg-yellow-100 text-ellipsis my-1 px-2 overflow-hidden max-w-[15ch]">{contract.address}</div>
-                  <img className="inline w-6 cursor-pointer" src="/copy.svg" />
-                  <img className="inline w-6 cursor-pointer" src="/link.svg" />
-                  </div>
-                  <div id="tooltip-contract-address" role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-      {contract.address}
-                </div>
-                <div className="flex flex-row">
-                  <div data-tooltip-target="tooltip-token-address" data-tooltip-placement="top" className="rounded-lg bg-yellow-100 text-ellipsis px-2 overflow-hidden max-w-[15ch]">{contract.token}</div>
-                  <img className="inline w-6 cursor-pointer" src="/copy.svg" />
-                  <img className="inline w-6 cursor-pointer" src="/link.svg" />
-                  </div>
-                  <div id="tooltip-token-address" role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-      {contract.token}
-                </div>
+                <ContractAddress address={contract.address} />
+                <ContractAddress address={contract.token} />
                 <div>{ contract.balance }</div>
                 <div>{ contract.numberOfSuccessors }</div>
                 <div>{ Math.round(contract.releasePeriod / SECONDS_IN_DAY - contract.daysSinceLastPing) } days</div>
