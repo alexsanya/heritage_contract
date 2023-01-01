@@ -1,4 +1,5 @@
 import React, { useState, useEffect, createContext } from 'react';
+import MainTemplate from './main-template';
 
 type Props = { children: React.ReactNode };
 
@@ -36,7 +37,19 @@ export const ConnectWallet: React.FC<Props> = ({ children }) => {
       { children }
     </MetamaskContext.Provider>
   ) : (
-    <button onClick={connect}>Connect metamask</button>
+    <MainTemplate>
+      <div className="flex flex-col items-center justify-center h-full">
+        <div className="flex flex-col sm:flex-row justify-center">
+          <div
+            className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-800 p-2 max-w-fit"
+            onClick={connect}
+          >
+            <img src="/metamask-white.png" className="w-10" />
+            <div className="text-xl font-medium text-white">Connect metamask</div>
+          </div>
+        </div>
+      </div>
+    </MainTemplate>
   )
 
 }
