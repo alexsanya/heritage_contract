@@ -18,6 +18,7 @@ import ContractAddress from './contract-address';
 import getTestament from './getTestament';
 import getDispenser from './getDispenser';
 import { MetamaskContext } from './ConnectWallet';
+import { ValueEdit } from './ValueEdit';
 
 interface ContractData {
   name: string;
@@ -34,15 +35,9 @@ interface ContractData {
 
 function Successor() {
   const account = useContext(MetamaskContext);
-
-  const [testamentAddress, setTestamentAddress] = useState('');
   const [allContracts, setAllContracts] = useState<ContractData[]>([]);
 
-  const onTestamentAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTestamentAddress(event.target.value);
-  }
-
-  const registerInTestament = async () => {
+  const registerInTestament = async (testamentAddress: string) => {
     const testament = getTestament(testamentAddress);
 
     await testament.methods.registerSuccessorApplicant().send({
@@ -170,6 +165,17 @@ function Successor() {
     );
   }
 
+  const RegisterButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+    return (
+      <div
+        className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit"
+        onClick={onClick}
+      >
+        <img src="/plus.svg" className="w-10" />
+        <div className="text-xl">Register new</div>
+      </div>
+    );
+  }
 
   const RegisteredContracts: React.FC<{ contracts: ContractData[] }> = ({ contracts }) => {
     return (
@@ -177,10 +183,14 @@ function Successor() {
         {contracts.map(contract => (
           <ContractCard contract={contract} />
         ))} 
-        <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
-          <img src="/plus.svg" className="w-10" />
-          <div className="text-xl">Register new</div>
-        </div>
+        <ValueEdit
+          initial={0}
+          commit="Register"
+          cancel="Cancel"
+          placeholder="Contract address"
+          onCommit={address => registerInTestament(address as string)}
+          Trigger={RegisterButton}
+        />
       </div>
     );
   }
