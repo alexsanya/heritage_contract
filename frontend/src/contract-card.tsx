@@ -42,7 +42,10 @@ export const ContractCard: React.FC<{ contract: ContractData }> = ({ contract })
   const account = useContext(MetamaskContext);
 
 
-  const persentage = Math.round(100*(contract.releasePeriod- contract.daysSinceLastPing*SECONDS_IN_DAY) / contract.releasePeriod);
+  const persentage = Math.max(
+    0,
+    Math.round(100*(contract.releasePeriod- contract.daysSinceLastPing*SECONDS_IN_DAY) / contract.releasePeriod)
+  );
   const color =  `hsl(${persentage*1.2}, 100%, 50%)`;
 
   const chartStyle = {
@@ -70,7 +73,7 @@ export const ContractCard: React.FC<{ contract: ContractData }> = ({ contract })
                 <ContractAddress address={contract.token} />
                 <div>{ contract.balance }</div>
                 <div>{ contract.numberOfSuccessors }</div>
-                <div>{ Math.round(contract.releasePeriod / SECONDS_IN_DAY - contract.daysSinceLastPing) } days</div>
+                <div>{ Math.max(0, Math.round(contract.releasePeriod / SECONDS_IN_DAY - contract.daysSinceLastPing)) } days</div>
               </div>
             </div>
             <div className="flex flex-row items-center justify-between pt-3 px-1">

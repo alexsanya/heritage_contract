@@ -10,16 +10,18 @@ import getTestament from './getTestament';
 import getDispenser from './getDispenser';
 import { MetamaskContext } from './ConnectWallet';
 import { ValueEdit } from './ValueEdit';
+import { SECONDS_IN_DAY } from './contract-card';
 
 interface ContractData {
   name: string;
   address: string;
   token: string;
+  decimals: number;
   volume: number;
   isValid: boolean;
   share?: number;
-  dateOfLastClaim?: number;
-  totalClaimed?: number;
+  dateOfLastClaim: number;
+  totalClaimed: number;
   isReleaseAvailible: boolean;
 }
 
@@ -53,12 +55,12 @@ function Successor() {
       return key;
     }
 
-    const getScale = async (address: string) => {
+    const getDecimals = async (address: string) => {
       const testament = getTestament(address);
       const tokenMint = await testament.methods.token().call();
       const token = getERC20(tokenMint);
       const decimals = await token.methods.decimals().call();
-      return 10**decimals;
+      return decimals;
     }
 
 
@@ -66,12 +68,15 @@ function Successor() {
       const testament = getTestament(address);
       const successor = await testament.methods.successors(await getKey(address, account || '')).call();
       const dispenser = getDispenser(successor.dispenser);
+      console.log(`Dispenser for testament ${address} is ${successor.dispenser}`);
+      const decimals = await getDecimals(address);
 
       return {
           address,
           token: await testament.methods.token().call(),
+          decimals,
           name: await factory.methods.contractNames(address).call(),
-          volume: await testament.methods.totalVolume().call() / await getScale(address),
+          volume: await testament.methods.totalVolume().call() / 10**decimals,
           isReleaseAvailible: await testament.methods.isFundsReleaseAvailible().call(),
           dateOfLastClaim: await dispenser.methods.lastWithdrawalTime().call(),
           totalClaimed: await dispenser.methods.totalWithdrawed().call(),
@@ -119,9 +124,24 @@ function Successor() {
     );
   }
 
+  const getDaysSinceWithdraw = async (lastClaimTimestamp: number) => {
+    
+    const { timestamp } =  await web3.eth.getBlock("latest") as { timestamp: number };
+
+    return Math.trunc((timestamp - lastClaimTimestamp) / SECONDS_IN_DAY);
+  }
+
   const ActionsPanel: React.FC<{contract: ContractData}> = ({ contract }) => {
+    const [daysSinceWithdraw, setDaysSinceWithdraw] = useState(0);
+
+    useEffect(() => {
+      (async () => {
+        setDaysSinceWithdraw(await getDaysSinceWithdraw(contract.dateOfLastClaim));
+      })();
+    }, []);
+
     return (<div className="m-auto">
-      { contract.isReleaseAvailible ?
+      { (contract.isReleaseAvailible && (daysSinceWithdraw >= 30)) ?
         <ClaimFunds contract={contract} /> :
         <ReleaseNotAvailible />
       }
@@ -145,8 +165,10 @@ function Successor() {
                 <div className="text-right leading-8">
                   <ContractAddress address={contract.address} />
                   <ContractAddress address={contract.token} />
-                  <div>{ contract.dateOfLastClaim }</div>
-                  <div>{ contract.totalClaimed }</div>
+                  <div>
+                    { contract.dateOfLastClaim > 0 ? new Date(contract.dateOfLastClaim*1000).toLocaleDateString("en-US") : '-' }
+                  </div>
+                  <div>{ contract.totalClaimed > 0 ? contract.totalClaimed / 10**contract.decimals : '-' }</div>
                 </div>
               </div>
             </div>
