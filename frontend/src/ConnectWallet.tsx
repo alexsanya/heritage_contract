@@ -39,7 +39,10 @@ export const ConnectWallet: React.FC<Props> = ({ children }) => {
   ) : (
     <MainTemplate>
       <div className="flex flex-col items-center justify-center h-full">
-        <div className="flex flex-col sm:flex-row justify-center">
+        <h1 className="font-xl font-medium">
+          Connect your Metamask wallet
+        </h1>
+        <div className="flex flex-col sm:flex-row justify-center my-4">
           <div
             className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-800 p-2 max-w-fit"
             onClick={connect}

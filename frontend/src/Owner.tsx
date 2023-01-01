@@ -85,7 +85,7 @@ function Owner() {
         ))} 
         <a
           href="/newContract"
-          className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit text-slate-200 bg-slate-800">
+          className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md p-2 max-w-fit text-slate-200 bg-slate-800">
           <img src="/newContract-white.png" className="w-10" />
           <div className="text-xl">Create new</div>
         </a>

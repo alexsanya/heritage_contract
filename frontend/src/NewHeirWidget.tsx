@@ -9,9 +9,12 @@ interface INewHeirWidgetProps {
 
 const AddButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
   return (
-    <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
+    <div
+      className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit"
+      onClick={ onClick }
+    >
       <img src="/person.svg" className="w-4" />
-      <div className="text-base" onClick={ onClick }>add...</div>
+      <div className="text-base">add...</div>
     </div>
   );
 }
