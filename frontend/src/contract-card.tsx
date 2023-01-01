@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { MetamaskContext } from "./ConnectWallet";
+import WithTooltip from './withTooltip';
 import getTestament from './getTestament';
 import ContractAddress from './contract-address';
 
@@ -73,26 +74,30 @@ export const ContractCard: React.FC<{ contract: ContractData }> = ({ contract })
               </div>
             </div>
             <div className="flex flex-row items-center justify-between pt-3 px-1">
-                <img
-                  src="/reset.svg"
-                  className="w-8 cursor-pointer"
-                  data-tooltip-target="tooltip-btn-reset"
-                  data-tooltip-placement="top"
-                  onClick={() => resetTimer(account, contract.address)}
-                />
-                <a href={`/edit-contract/${contract.address}`} data-tooltip-target="tooltip-btn-edit" data-tooltip-placement="top">
-                  <img src="/edit.svg" className="w-8 cursor-pointer" />
-                </a>
-                <img
-                  src="/delete.svg"
-                  className="w-8 cursor-pointer"
-                  data-tooltip-target="tooltip-btn-delete"
-                  data-tooltip-placement="top"
-                  onClick={() => deleteTestament(account, contract.address)}
-                />
-                <div id="tooltip-btn-reset" role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">Reset timer</div>
-                <div id="tooltip-btn-edit" role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">Edit contract</div>
-                <div id="tooltip-btn-delete" role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">Delete contract</div>
+                <WithTooltip title="reset timer" Widget={({ anchor }) => (
+                  <img
+                    src="/reset.svg"
+                    ref={anchor}
+                    className="w-8 cursor-pointer"
+                    onClick={() => resetTimer(account, contract.address)}
+                  />
+                )} />
+                <WithTooltip title="edit testament" Widget={({ anchor }) => (
+                  <a href={`/edit-contract/${contract.address}`} ref={anchor}>
+                    <img src="/edit.svg" className="w-8 cursor-pointer" />
+                  </a>
+                )} />
+                <WithTooltip title="delete testament" Widget={({ anchor }) => (
+                  <img
+                    src="/delete.svg"
+                    className="w-8 cursor-pointer"
+                    ref={anchor}
+                    onClick={() => deleteTestament(account, contract.address)}
+                  />
+                )} />
+                <div id={`tooltip-btn-reset-${contract.address}`} role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">Reset timer</div>
+                <div id={`tooltip-btn-edit-${contract.address}`} role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">Edit contract</div>
+                <div id={`tooltip-btn-delete-${contract.address}`} role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">Delete contract</div>
             </div>
           </div>
           <div> 

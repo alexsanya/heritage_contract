@@ -1,10 +1,4 @@
 import { useState } from "react";
-import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
-import TextField from '@mui/material/TextField';
-import Slider from '@mui/material/Slider';
-import Stack from '@mui/material/Stack';
-
 import { ValueEdit } from './ValueEdit';
 
 export interface SuccessorConstraints {
@@ -22,11 +16,7 @@ type Props = {
 export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove }) => {
   const successorsNames =  Object.keys(successors);
   const absorber = successorsNames[successorsNames.length - 1];
-
-
   const limits = Object.keys(successors).reduce((acc, key) => ({...acc, [key]: successors[key].limit}), {})
-  const [monthlyLimits, setMonthlyLimits] = useState<{[name: string]: number}>(limits);
-
 
   const handleChange = (name: string, newValue: number | number[], newLimit: number) => {
     console.log(name, newValue);

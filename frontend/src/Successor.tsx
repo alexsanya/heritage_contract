@@ -1,15 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import * as _ from 'lodash';
 
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-
 import web3 from './web3';
 import BN from 'bn.js';
 import factory from './factory';

@@ -1,11 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import * as _ from 'lodash';
-import Grid from '@mui/material/Grid';
-import Chip from '@mui/material/Chip';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Stack from '@mui/material/Stack';
 import web3 from './web3';
 import BN from 'bn.js';
 import { MetamaskContext } from './ConnectWallet';
@@ -30,9 +25,6 @@ function EditContract() {
   const [decimals, setDecimals] =  useState(0);
   const [contractName, setContractName] = useState('');
   const [contractTotalValue, setContractTotalValue] = useState(0);
-  const [showAddressFoundLabel, setShowAddressFoundLabel] = useState(false);
-  const [showNotFoundLabel, setShowNotFoundLabel] = useState(false);
-  const [newHeirDialog, setNewHeirDialog] = useState(false);
   const [successors, setSuccessors] = useState<{ [name: string]: SuccessorConstraints }>({});
 
   useEffect(() => {
@@ -120,7 +112,7 @@ function EditContract() {
       ...preUpdatedValues,
       [absorber]: {
         ...successors[absorber],
-        share: 100 - successorsNames.filter(name => name != absorber).reduce((acc, name) => acc+preUpdatedValues[name].share, 0),
+        share: 100 - successorsNames.filter(name => name !== absorber).reduce((acc, name) => acc+preUpdatedValues[name].share, 0),
       },
     }
     console.log(name, share, limit);

@@ -1,6 +1,3 @@
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import { useNavigate } from "react-router-dom";
 
 import factory from './factory';
@@ -18,7 +15,6 @@ interface TokenOption {
 }
 
 const OptionsSelector: React.FC<{ label: string, items: TokenOption[], onChange: (value: string) => void }> = ({ label, items, onChange }) =>  {
-  const [tokenAddress, setTokenAddress] = useState('');
   const [customValue, setCustomValue] = useState('');
   const [displayCustomInput, setDisplayCustomInput] = useState(false);
   const setActive = (value: string) => {
@@ -149,7 +145,7 @@ function NewContract() {
       address,
       period: parseInt(period)*SECONDS_IN_HOUR
     });
-    const result = await factory.methods.create(contractName, address, parseInt(period)*SECONDS_IN_HOUR).send({
+    await factory.methods.create(contractName, address, parseInt(period)*SECONDS_IN_HOUR).send({
       from: account
     });
     navigate('/owner');

@@ -1,10 +1,3 @@
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import { Link } from "react-router-dom";
 import web3 from './web3';
 import { MetamaskContext } from "./ConnectWallet";
 import React, { useContext, useState, useEffect } from "react";
