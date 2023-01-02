@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 import factory from './factory';
+import BackButton from './backButton';
 import { MetamaskContext } from './ConnectWallet';
 
 import React, { useState, useContext } from 'react';
@@ -160,10 +161,7 @@ function NewContract() {
   }
 
   return (<>
-      <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
-        <img src="/back.svg" className="w-10" />
-        <div className="text-xl">Back</div>
-      </div>
+      <BackButton />
       <div className="flex flex-col h-full mt-5">
         <div className="flex flex-col gap-3">
           <div className="flex flex-row">

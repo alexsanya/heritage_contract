@@ -11,6 +11,7 @@ import getDispenser from './getDispenser';
 import { MetamaskContext } from './ConnectWallet';
 import { ValueEdit } from './ValueEdit';
 import { SECONDS_IN_DAY } from './contract-card';
+import BackButton from './backButton';
 
 interface ContractData {
   name: string;
@@ -212,10 +213,7 @@ function Successor() {
 
   return (
     <div className="mb-4">
-      <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
-        <img src="/back.svg" className="w-10" />
-        <div className="text-xl">Back</div>
-      </div>
+      <BackButton />
       <RegisteredContracts contracts={allContracts}/>
     </div>
   );

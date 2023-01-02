@@ -6,8 +6,7 @@ import factory from './factory';
 import getTestament from './getTestament';
 import getERC20 from './getERC20';
 import {ContractData, ContractCard, SECONDS_IN_DAY} from './contract-card';
-
-
+import BackButton from './backButton';
 
 function Owner() {
 
@@ -88,10 +87,7 @@ function Owner() {
 
   return (
     <div className="mb-4">
-      <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
-        <img src="/back.svg" className="w-10" />
-        <div className="text-xl">Back</div>
-      </div>
+      <BackButton />
       <ExistingContracts contracts={allContracts}/>
     </div>
   );

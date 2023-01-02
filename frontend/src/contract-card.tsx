@@ -3,6 +3,7 @@ import { MetamaskContext } from "./ConnectWallet";
 import WithTooltip from './withTooltip';
 import getTestament from './getTestament';
 import ContractAddress from './contract-address';
+import { Link } from "react-router-dom";
 
 export const SECONDS_IN_DAY = 24*3600;
 
@@ -86,9 +87,9 @@ export const ContractCard: React.FC<{ contract: ContractData }> = ({ contract })
                   />
                 )} />
                 <WithTooltip title="edit testament" Widget={({ anchor }) => (
-                  <a href={`/edit-contract/${contract.address}`} ref={anchor}>
+                  <Link to={`/edit-contract/${contract.address}`} ref={anchor}>
                     <img src="/edit.svg" className="w-8 cursor-pointer" />
-                  </a>
+                  </Link>
                 )} />
                 <WithTooltip title="delete testament" Widget={({ anchor }) => (
                   <img

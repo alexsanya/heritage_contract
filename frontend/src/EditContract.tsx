@@ -13,6 +13,7 @@ import getTestament from './getTestament';
 import factory from './factory';
 import getERC20 from './getERC20';
 import { SECONDS_IN_DAY } from './contract-card';
+import BackButton from './backButton';
 
 
 function EditContract() {
@@ -27,56 +28,58 @@ function EditContract() {
   const [contractTotalValue, setContractTotalValue] = useState(0);
   const [successors, setSuccessors] = useState<{ [name: string]: SuccessorConstraints }>({});
 
-  useEffect(() => {
-    (async () => {
-      if (!address) {
-        return;
-      }
-      const testament = getTestament(address);
-      const contractName = await factory.methods.contractNames(address).call();
-      const tokenMint = await testament.methods.token().call();
-      const releasePeriod = await testament.methods.maxPeriodOfSilense().call({from: account });
-      const token = getERC20(tokenMint);
-      const decimals = await token.methods.decimals().call();
-      const totalValue = await token.methods.balanceOf(address).call();
+  const refreshContractData = async () => {
+    if (!address) {
+      return;
+    }
+    const testament = getTestament(address);
+    const contractName = await factory.methods.contractNames(address).call();
+    const tokenMint = await testament.methods.token().call();
+    const releasePeriod = await testament.methods.maxPeriodOfSilense().call({from: account });
+    const token = getERC20(tokenMint);
+    const decimals = await token.methods.decimals().call();
+    const totalValue = await token.methods.balanceOf(address).call();
 
-      setToken(token);
-      setTestament(testament);
-      setContractTotalValue(new BN(totalValue).div(new BN(10**decimals)).toNumber());
-      setLockingPeriod(releasePeriod /SECONDS_IN_DAY);
-      setDecimals(decimals);
-      setContractName(contractName);
+    setToken(token);
+    setTestament(testament);
+    setContractTotalValue(new BN(totalValue).div(new BN(10**decimals)).toNumber());
+    setLockingPeriod(releasePeriod /SECONDS_IN_DAY);
+    setDecimals(decimals);
+    setContractName(contractName);
 
-      const successorsListVersion = await testament.methods.successorsListVersion().call();
-      const successorsNumber = await testament.methods.numberOfSuccessors().call();
-      console.log(`Successors number: ${successorsNumber}`);
-      console.log(`successorsListVersion: ${successorsListVersion}`);
-      let successorsData = {}
-      for (let i=0; i < successorsNumber; i++) {
-        const wallet = await testament.methods.listOfSuccessors(i).call();
-        console.log(`Wallet: ${wallet}`);
-        const key = web3.utils.soliditySha3(
-          {t: 'uint32', v: new BN(successorsListVersion)},
-          {t: 'address', v: wallet},
-        );      
-        console.log('Key:', key);
-        const successor = await testament.methods.successors(key).call();
-        console.log(successor);
-        successorsData = {
-          ...successorsData,
-          [successor.name]: {
-            limit: new BN(successor.maxPerMonth).div(new BN(10**decimals)).toNumber(),
-            share: +successor.share,
-            wallet: successor.wallet
-          }
+    const successorsListVersion = await testament.methods.successorsListVersion().call();
+    const successorsNumber = await testament.methods.numberOfSuccessors().call();
+    console.log(`Successors number: ${successorsNumber}`);
+    console.log(`successorsListVersion: ${successorsListVersion}`);
+    let successorsData = {}
+    for (let i=0; i < successorsNumber; i++) {
+      const wallet = await testament.methods.listOfSuccessors(i).call();
+      console.log(`Wallet: ${wallet}`);
+      const key = web3.utils.soliditySha3(
+        {t: 'uint32', v: new BN(successorsListVersion)},
+        {t: 'address', v: wallet},
+      );      
+      console.log('Key:', key);
+      const successor = await testament.methods.successors(key).call();
+      console.log(successor);
+      successorsData = {
+        ...successorsData,
+        [successor.name]: {
+          limit: new BN(successor.maxPerMonth).div(new BN(10**decimals)).toNumber(),
+          share: +successor.share,
+          wallet: successor.wallet
         }
       }
-      console.log(successorsData);
-      setSuccessors(successorsData);
+    }
+    console.log(successorsData);
+    setSuccessors(successorsData);
       
 
       console.log({ testament, tokenMint, token, decimals });
-    })();
+  }
+
+  useEffect(() => {
+    refreshContractData();
   }, []);
 
   const addFunds = async (amount: number) => {
@@ -85,15 +88,18 @@ function EditContract() {
     const value = amount * 10**decimals;
     await token.methods.approve(address, value).send({ from: account });
     await testament.methods.depositTokens(value).send({ from: account });
+    refreshContractData();
   }
 
   const updateMaxPeriodOfSilence = async (period: number) => {
     await testament.methods.updateMaxPeriodOfSilence(period * SECONDS_IN_DAY).send({ from: account });
+    refreshContractData();
   }
 
   const withdrawFunds = async (amount: number) => {
     const value = amount * 10**decimals;
     await testament.methods.withdrawTokens(value).send({ from: account });
+    refreshContractData();
   }
 
   const updateSuccessors = (name: string, share: number, limit: number) => {
@@ -154,6 +160,7 @@ function EditContract() {
     await testament.methods.setSuccessors(successorsData).send({
       from: account
     });
+    refreshContractData();
   }
   
   const onRemove = (nameToRemove: string) => {
@@ -200,10 +207,7 @@ function EditContract() {
 
   return (
     <>
-      <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
-        <img src="/back.svg" className="w-10" />
-        <div className="text-xl">Back</div>
-      </div>
+      <BackButton />
       <div className="flex flex-col h-full font-sans text-2xl">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="rounded-lg m-3 p-3">
