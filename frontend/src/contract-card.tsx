@@ -4,8 +4,7 @@ import WithTooltip from './withTooltip';
 import getTestament from './getTestament';
 import ContractAddress from './contract-address';
 import { Link } from "react-router-dom";
-
-export const SECONDS_IN_DAY = 24*3600;
+import { maxPriorityFeePerGas, SECONDS_IN_DAY } from './config';
 
 export interface ContractData {
   address: string;
@@ -21,7 +20,8 @@ const resetTimer = async (account: any, address: string) => {
   const testament = getTestament(address);
 
   const result = await testament.methods.resetCountdownTimer().send({
-    from: account
+    from: account,
+    maxPriorityFeePerGas
   });
 
   console.log('Reseting timer...');
@@ -32,7 +32,8 @@ const deleteTestament = async (account: any, address: string) => {
   const testament = getTestament(address);
   
   const result = await testament.methods.kill().send({
-    from: account
+    from: account,
+    maxPriorityFeePerGas
   });
 
   console.log('Removing testament...');

@@ -11,7 +11,7 @@ export const ConnectWallet: React.FC<Props> = ({ children }) => {
   useEffect(() => { 
     const wrapper = async () => {
       const accounts = await window.ethereum.request({
-        method: "eth_accounts",
+        method: "eth_requestAccounts",
       });
 
       if (accounts.length > 0) {

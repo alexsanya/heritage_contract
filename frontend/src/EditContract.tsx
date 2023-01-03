@@ -12,8 +12,8 @@ import { SuccessorsList, SuccessorConstraints } from './SuccessorsList';
 import getTestament from './getTestament';
 import factory from './factory';
 import getERC20 from './getERC20';
-import { SECONDS_IN_DAY } from './contract-card';
 import BackButton from './backButton';
+import { maxPriorityFeePerGas, SECONDS_IN_DAY } from './config';
 
 
 function EditContract() {
@@ -40,9 +40,16 @@ function EditContract() {
     const decimals = await token.methods.decimals().call();
     const totalValue = await token.methods.balanceOf(address).call();
 
+    console.log({
+      token,
+      decimals,
+      totalValue,
+      releasePeriod
+    });
+
     setToken(token);
     setTestament(testament);
-    setContractTotalValue(new BN(totalValue).div(new BN(10**decimals)).toNumber());
+    setContractTotalValue(new BN(totalValue).div(new BN(10).pow(new BN(decimals))).toNumber());
     setLockingPeriod(releasePeriod /SECONDS_IN_DAY);
     setDecimals(decimals);
     setContractName(contractName);
@@ -85,9 +92,15 @@ function EditContract() {
   const addFunds = async (amount: number) => {
     console.log('token', token);
 
-    const value = amount * 10**decimals;
-    await token.methods.approve(address, value).send({ from: account });
-    await testament.methods.depositTokens(value).send({ from: account });
+    const value = new BN(amount).mul(new BN(10).pow(new BN(decimals)));
+    await token.methods.approve(address, value).send({
+      from: account,
+      maxPriorityFeePerGas
+    });
+    await testament.methods.depositTokens(value).send({
+      from: account,
+      maxPriorityFeePerGas
+    });
     refreshContractData();
   }
 
@@ -158,7 +171,8 @@ function EditContract() {
     }));
     console.log(successorsData);
     await testament.methods.setSuccessors(successorsData).send({
-      from: account
+      from: account,
+      maxPriorityFeePerGas
     });
     refreshContractData();
   }

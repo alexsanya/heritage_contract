@@ -3,19 +3,12 @@ import { useNavigate } from "react-router-dom";
 import factory from './factory';
 import BackButton from './backButton';
 import { MetamaskContext } from './ConnectWallet';
+import {maxPriorityFeePerGas, SECONDS_IN_DAY, IDefaultOption, defaultTokens, defaultPeriods} from  './config';
 
 import React, { useState, useContext } from 'react';
 
-const SECONDS_IN_HOUR = 24*3600;
 
-interface TokenOption {
-  name: string;
-  value: string;
-  active?: boolean;
-  isCustom?: boolean;
-}
-
-const OptionsSelector: React.FC<{ label: string, items: TokenOption[], onChange: (value: string) => void }> = ({ label, items, onChange }) =>  {
+const OptionsSelector: React.FC<{ label: string, items: IDefaultOption[], onChange: (value: string) => void }> = ({ label, items, onChange }) =>  {
   const [customValue, setCustomValue] = useState('');
   const [displayCustomInput, setDisplayCustomInput] = useState(false);
   const setActive = (value: string) => {
@@ -26,7 +19,7 @@ const OptionsSelector: React.FC<{ label: string, items: TokenOption[], onChange:
   const onCustomValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCustomValue(event.target.value);
   };
-  const OptionControl: React.FC<{ item: TokenOption }> = ({ item }) => {
+  const OptionControl: React.FC<{ item: IDefaultOption }> = ({ item }) => {
     const getClassName = (isActive: boolean) => isActive ?
       "cursor-pointer rounded-full bg-yellow-100 drop-shadow-md mx-2 px-3 py-1 border-2 border-yellow-500" :
       "cursor-pointer rounded-full bg-slate-100 drop-shadow-md mx-2 px-3 py-1"
@@ -87,44 +80,12 @@ const OptionsSelector: React.FC<{ label: string, items: TokenOption[], onChange:
 }
 
 function NewContract() {
-  const [periodOptions, setPeriodOptions] = useState([
-    {
-      name: '100',
-      value: '100',
-      active: true
-    },
-    {
-      name: '90',
-      value: '90'
-    },
-    {
-      name: '60',
-      value: '60'
-    },
-    {
-      name: '30',
-      value: '30'
-    }
+  const [tokenOptions, setTokenOptions]  = useState<IDefaultOption[]>([
+    {...defaultTokens[0], active: true}, ...defaultTokens.splice(1)
   ]);
 
-  const [tokenOptions, setTokenOptions] = useState([
-    {
-      name: 'USDC',
-      value: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
-      active: true
-    },
-    {
-      name: 'USDT',
-      value: '0x55d398326f99059ff775485246999027b3197955'
-    },
-    {
-      name: 'BUSD',
-      value: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'
-    },
-    {
-      name: 'PAXG',
-      value: '0x7950865a9140cB519342433146Ed5b40c6F210f7'
-    }
+  const [periodOptions, setPeriodOptions] = useState<IDefaultOption[]>([
+    {...defaultPeriods[0], active: true}, ...defaultPeriods.splice(1)
   ]);
   const [contractName, setContractName] = useState('');
 
@@ -144,10 +105,11 @@ function NewContract() {
     console.log({
       contractName,
       address,
-      period: parseInt(period)*SECONDS_IN_HOUR
+      period: parseInt(period)*SECONDS_IN_DAY
     });
-    await factory.methods.create(contractName, address, parseInt(period)*SECONDS_IN_HOUR).send({
-      from: account
+    await factory.methods.create(contractName, address, parseInt(period)*SECONDS_IN_DAY).send({
+      from: account,
+      maxPriorityFeePerGas
     });
     navigate('/owner');
   }

@@ -1,4 +1,5 @@
 import WithTooltip from './withTooltip';
+import { chainExplorerUrl } from './config';
 
 const ContractAddress: React.FC<{address: string}> = ({ address }) => {
     return (<>
@@ -21,7 +22,9 @@ const ContractAddress: React.FC<{address: string}> = ({ address }) => {
           />
         )} />
         <WithTooltip title="see in explorer" Widget={({ anchor }) => (
-          <img className="inline w-6 cursor-pointer" src="/link.svg" ref={anchor} />
+          <a href={`${chainExplorerUrl}/${address}`} target='blank'>
+            <img className="inline w-6 cursor-pointer" src="/link.svg" ref={anchor} />
+          </a>
         )} />
       </div>
     </>);

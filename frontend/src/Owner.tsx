@@ -5,7 +5,8 @@ import React, { useContext, useState, useEffect } from "react";
 import factory from './factory';
 import getTestament from './getTestament';
 import getERC20 from './getERC20';
-import {ContractData, ContractCard, SECONDS_IN_DAY} from './contract-card';
+import { SECONDS_IN_DAY } from './config';
+import {ContractData, ContractCard } from './contract-card';
 import BackButton from './backButton';
 
 function Owner() {

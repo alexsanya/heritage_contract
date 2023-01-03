@@ -10,7 +10,7 @@ import getTestament from './getTestament';
 import getDispenser from './getDispenser';
 import { MetamaskContext } from './ConnectWallet';
 import { ValueEdit } from './ValueEdit';
-import { SECONDS_IN_DAY } from './contract-card';
+import { SECONDS_IN_DAY, maxPriorityFeePerGas } from './config';
 import BackButton from './backButton';
 
 interface ContractData {
@@ -35,7 +35,8 @@ function Successor() {
     const testament = getTestament(testamentAddress);
 
     await testament.methods.registerSuccessorApplicant().send({
-      from: account
+      from: account,
+      maxPriorityFeePerGas
     });
   }
 
@@ -103,7 +104,8 @@ function Successor() {
     const testament = getTestament(address);
 
     await testament.methods.claimHeritage().send({
-      from: account
+      from: account,
+      maxPriorityFeePerGas
     });
   }
 

@@ -18,7 +18,7 @@ module.exports = function(deployer) {
 
   return Promise.all([
     deployer.deploy(Factory),
-    deployer.deploy(Token, "10000")
+    //deployer.deploy(Token, "10000")
   ]);
 
 };

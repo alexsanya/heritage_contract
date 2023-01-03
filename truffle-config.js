@@ -54,6 +54,14 @@ module.exports = {
       network_id: 97,
       skipDryRun: true
     },
+    matic: {
+      provider: () => new HDWalletProvider(mnemonic, `https://polygon-rpc.com/`),
+      network_id: 137,
+      confirmations: 2,
+      gasPrice: 33000000000,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
     //
     // An additional network, but with some advanced options…
     // advanced: {
