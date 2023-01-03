@@ -9,6 +9,10 @@ export interface IDefaultOption {
   isCustom?: boolean;
 }
 
+export const chainId = '0x89'; // polygon mainnet
+export const factoryAddress = '0x4b2fFA096f28674B8E4f73D6F94c7b8AFD39b494';
+  // '0xa0408524444aB165296D6B0D8BC21c0eD693ee51' - ganache
+
 export const defaultTokens = [
   {
     name: 'USDC',

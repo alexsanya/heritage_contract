@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import detectEthereumProvider from '@metamask/detect-provider';
 
+import { chainId } from './config';
 import { ConnectWallet } from './ConnectWallet';
 import NoMetamaskPage from './NoMetamaskPage';
 
@@ -18,7 +19,7 @@ export const Metamask: React.FC<Props> = ({ children }) => {
       }
       await ethProvider.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x89" }],
+        params: [{ chainId }],
       });
 
     })

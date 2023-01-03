@@ -105,7 +105,10 @@ function EditContract() {
   }
 
   const updateMaxPeriodOfSilence = async (period: number) => {
-    await withLoader(() => testament.methods.updateMaxPeriodOfSilence(period * SECONDS_IN_DAY).send({ from: account }));
+    await withLoader(() => testament.methods.updateMaxPeriodOfSilence(period * SECONDS_IN_DAY).send({
+      from: account,
+      maxPriorityFeePerGas
+    }));
     refreshContractData();
   }
 

@@ -137,7 +137,7 @@ function NewContract() {
             />
           </div>
           <OptionsSelector label="Select token:" items={tokenOptions} onChange={setActiveToken}/>
-          <OptionsSelector label="SelectPeriod:" items={periodOptions} onChange={setActivePeriod}/>
+          <OptionsSelector label="Select period:" items={periodOptions} onChange={setActivePeriod}/>
           <div className="flex flex-row items-center gap-2 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-2 max-w-fit">
             <img src="/save.svg" className="w-8" />
             <div className="text-l" onClick={createContract}>Create</div>
