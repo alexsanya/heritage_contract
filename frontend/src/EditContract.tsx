@@ -72,7 +72,7 @@ function EditContract() {
       successorsData = {
         ...successorsData,
         [successor.name]: {
-          limit: new BN(successor.maxPerMonth).div(new BN(10**decimals)).toNumber(),
+          limit: new BN(successor.maxPerMonth).div(new BN(10).pow(new BN(decimals))).toNumber(),
           share: +successor.share,
           wallet: successor.wallet
         }
@@ -110,8 +110,11 @@ function EditContract() {
   }
 
   const withdrawFunds = async (amount: number) => {
-    const value = amount * 10**decimals;
-    await withLoader(() => testament.methods.withdrawTokens(value).send({ from: account }));
+    const value = new BN(amount).mul(new BN(10).pow(new BN(decimals)));
+    await withLoader(() => testament.methods.withdrawTokens(value).send({
+      from: account,
+      maxPriorityFeePerGas
+    }));
     refreshContractData();
   }
 
@@ -167,7 +170,7 @@ function EditContract() {
       wallet: successors[name].wallet,
       dispenser: ZERO_ADDRESS,
       fundsBeenReleased: false,
-      maxPerMonth: new BN(successors[name].limit).mul(new BN(10**decimals)).toString()
+      maxPerMonth: new BN(successors[name].limit).mul(new BN(10).pow(new BN(decimals))).toString()
     }));
     console.log(successorsData);
     await withLoader(() => testament.methods.setSuccessors(successorsData).send({

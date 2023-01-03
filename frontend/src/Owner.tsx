@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import web3 from './web3';
 import { MetamaskContext } from "./ConnectWallet";
 import React, { useContext, useState, useEffect } from "react";
@@ -50,7 +51,7 @@ function Owner() {
         numberOfSuccessors,
         releasePeriod,
         daysSinceLastPing: await getDaysSinceLastPing(lastPingTime),
-        balance: rawBalance / 10**decimals 
+        balance: new BN(rawBalance).div(new BN(10).pow(new BN(decimals))).toNumber() 
       };
     }
 

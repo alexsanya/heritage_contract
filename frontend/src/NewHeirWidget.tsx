@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { MetamaskContext } from './ConnectWallet';
 import { useParams } from "react-router-dom";
 import getTestament from './getTestament';
 import { ValueEdit, UserInputs } from './ValueEdit';
@@ -32,6 +33,7 @@ const NewHeirWidget: React.FC<INewHeirWidgetProps> = ({ onAdd }) => {
   const [ invalidTag, setInvalidTag ] = useState<string | boolean>(false);
   const { address: testamentAddress } = useParams();
 
+  const { withLoader } = useContext(MetamaskContext);
 
   const validateAddress = async (address: string | number) => {
     const isRegistered = testamentAddress && (await checkIfAddressRegistered(testamentAddress, address as string));
@@ -56,6 +58,10 @@ const NewHeirWidget: React.FC<INewHeirWidgetProps> = ({ onAdd }) => {
     setInvalidTag(false);
   }
 
+  const onValidateAddress = (address: string | number) => {
+    withLoader(() => validateAddress(address), 'Validating address...');
+  }
+
   return (<>
     { !validTag && (
         <ValueEdit
@@ -64,7 +70,7 @@ const NewHeirWidget: React.FC<INewHeirWidgetProps> = ({ onAdd }) => {
           placeholder="address"
           initial={0}
           onShow={onAddHeirFormShow}
-          onCommit={validateAddress}
+          onCommit={onValidateAddress}
           Trigger={AddButton}
         />
     )}
