@@ -110,8 +110,7 @@ function Successor() {
   }
 
   useEffect(() => {
-    getContracts().then(contracts => setAllContracts(contracts));
-
+    withLoader(() => getContracts().then(contracts => setAllContracts(contracts)), 'Loading data from chain...');
   }, []);
 
   const ReleaseNotAvailible = () => (

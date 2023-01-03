@@ -12,7 +12,7 @@ import BackButton from './backButton';
 function Owner() {
 
   const [allContracts, setAllContracts] = useState<ContractData[]>([]);
-  const { account } = useContext(MetamaskContext);
+  const { account, withLoader } = useContext(MetamaskContext);
 
 
   const getContracts = async () => {
@@ -64,7 +64,7 @@ function Owner() {
   }
 
   useEffect(() => {
-    getContracts().then(contracts => setAllContracts(contracts));
+    withLoader(() => getContracts().then(contracts => setAllContracts(contracts)), 'Loading data from chain...');
   }, []);
 
 

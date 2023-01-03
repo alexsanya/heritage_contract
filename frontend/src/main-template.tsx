@@ -2,13 +2,13 @@ import { useContext } from "react";
 import { MetamaskContext } from "./ConnectWallet";
 
 const MainTemplate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { awaitingConfirmation } = useContext(MetamaskContext);
+  const { awaitingConfirmation, label } = useContext(MetamaskContext);
 
   return (<>
     <div style={{ display: awaitingConfirmation ? 'flex' : 'none' }} className='modal'>
         <div className='modal-content'>
           <div className='loader'></div>
-          <div className='modal-text'>Confirming transaction...</div>
+          <div className='modal-text'>{label || 'Confirming transaction...'}</div>
         </div>
       </div>
     <div className="flex flex-col h-full">

@@ -5,8 +5,9 @@ type Props = { children: React.ReactNode };
 
 export const MetamaskContext = createContext<{
   account: any,
+  label?: string,
   awaitingConfirmation: boolean,
-  withLoader: (action: () => Promise<void>) => Promise<void>
+  withLoader: (action: () => Promise<void>, label?: string) => Promise<void>
 }>({
   account: null,
   awaitingConfirmation: false,
@@ -15,6 +16,7 @@ export const MetamaskContext = createContext<{
 
 export const ConnectWallet: React.FC<Props> = ({ children }) => {
   const [account, setAccount] = useState(null);
+  const [label, setLabel] = useState<undefined | string>();
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
   useEffect(() => { 
@@ -41,14 +43,18 @@ export const ConnectWallet: React.FC<Props> = ({ children }) => {
 
   console.log(`[ConnectWallet] Account is ${account}`);
 
-  const withLoader = async (action: () => Promise<void>) => {
-    setAwaitingConfirmation(true);
-    await action();
-    setAwaitingConfirmation(false);
+  const withLoader = async (action: () => Promise<void>, label?: string) => {
+    setLabel(label);
+    try {
+      setAwaitingConfirmation(true);
+      await action();
+    } finally {
+      setAwaitingConfirmation(false);
+    }
   }
 
   return account ? (
-    <MetamaskContext.Provider value={{account, awaitingConfirmation, withLoader}}>
+    <MetamaskContext.Provider value={{account, awaitingConfirmation, withLoader, label}}>
       { children }
     </MetamaskContext.Provider>
   ) : (

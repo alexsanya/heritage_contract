@@ -86,7 +86,7 @@ function EditContract() {
   }
 
   useEffect(() => {
-    refreshContractData();
+    withLoader(() => refreshContractData(), 'Loading data from chain...');
   }, []);
 
   const addFunds = async (amount: number) => {
