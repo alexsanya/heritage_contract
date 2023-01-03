@@ -91,7 +91,7 @@ function NewContract() {
 
   const navigate = useNavigate();
 
-  const account = useContext(MetamaskContext);
+  const { account, withLoader } = useContext(MetamaskContext);
 
   console.log(`[NewContract] account: ${account}`);
 
@@ -107,10 +107,10 @@ function NewContract() {
       address,
       period: parseInt(period)*SECONDS_IN_DAY
     });
-    await factory.methods.create(contractName, address, parseInt(period)*SECONDS_IN_DAY).send({
+    await withLoader(() => factory.methods.create(contractName, address, parseInt(period)*SECONDS_IN_DAY).send({
       from: account,
       maxPriorityFeePerGas
-    });
+    }));
     navigate('/owner');
   }
 

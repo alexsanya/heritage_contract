@@ -17,7 +17,7 @@ import { maxPriorityFeePerGas, SECONDS_IN_DAY } from './config';
 
 
 function EditContract() {
-  const account = useContext(MetamaskContext);
+  const { account, withLoader } = useContext(MetamaskContext);
   const { address } = useParams();
 
   const [testament, setTestament] = useState<any>();
@@ -93,25 +93,25 @@ function EditContract() {
     console.log('token', token);
 
     const value = new BN(amount).mul(new BN(10).pow(new BN(decimals)));
-    await token.methods.approve(address, value).send({
+    await withLoader(() => token.methods.approve(address, value).send({
       from: account,
       maxPriorityFeePerGas
-    });
-    await testament.methods.depositTokens(value).send({
+    }));
+    await withLoader(() => testament.methods.depositTokens(value).send({
       from: account,
       maxPriorityFeePerGas
-    });
+    }));
     refreshContractData();
   }
 
   const updateMaxPeriodOfSilence = async (period: number) => {
-    await testament.methods.updateMaxPeriodOfSilence(period * SECONDS_IN_DAY).send({ from: account });
+    await withLoader(() => testament.methods.updateMaxPeriodOfSilence(period * SECONDS_IN_DAY).send({ from: account }));
     refreshContractData();
   }
 
   const withdrawFunds = async (amount: number) => {
     const value = amount * 10**decimals;
-    await testament.methods.withdrawTokens(value).send({ from: account });
+    await withLoader(() => testament.methods.withdrawTokens(value).send({ from: account }));
     refreshContractData();
   }
 
@@ -170,10 +170,10 @@ function EditContract() {
       maxPerMonth: new BN(successors[name].limit).mul(new BN(10**decimals)).toString()
     }));
     console.log(successorsData);
-    await testament.methods.setSuccessors(successorsData).send({
+    await withLoader(() => testament.methods.setSuccessors(successorsData).send({
       from: account,
       maxPriorityFeePerGas
-    });
+    }));
     refreshContractData();
   }
   

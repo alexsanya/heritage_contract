@@ -28,16 +28,16 @@ interface ContractData {
 
 
 function Successor() {
-  const account = useContext(MetamaskContext);
+  const { account, withLoader } = useContext(MetamaskContext);
   const [allContracts, setAllContracts] = useState<ContractData[]>([]);
 
   const registerInTestament = async (testamentAddress: string) => {
     const testament = getTestament(testamentAddress);
 
-    await testament.methods.registerSuccessorApplicant().send({
+    await withLoader(() => testament.methods.registerSuccessorApplicant().send({
       from: account,
       maxPriorityFeePerGas
-    });
+    }));
   }
 
   const getContracts = async () => {
@@ -103,10 +103,10 @@ function Successor() {
   const claimShare = async (address: string) => {
     const testament = getTestament(address);
 
-    await testament.methods.claimHeritage().send({
+    await withLoader(() => testament.methods.claimHeritage().send({
       from: account,
       maxPriorityFeePerGas
-    });
+    }));
   }
 
   useEffect(() => {

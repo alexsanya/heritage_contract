@@ -3,10 +3,19 @@ import MainTemplate from './main-template';
 
 type Props = { children: React.ReactNode };
 
-export const MetamaskContext = createContext(null);
+export const MetamaskContext = createContext<{
+  account: any,
+  awaitingConfirmation: boolean,
+  withLoader: (action: () => Promise<void>) => Promise<void>
+}>({
+  account: null,
+  awaitingConfirmation: false,
+  withLoader: async (action: () => Promise<void>) => {}
+});
 
 export const ConnectWallet: React.FC<Props> = ({ children }) => {
   const [account, setAccount] = useState(null);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
   useEffect(() => { 
     const wrapper = async () => {
@@ -32,8 +41,14 @@ export const ConnectWallet: React.FC<Props> = ({ children }) => {
 
   console.log(`[ConnectWallet] Account is ${account}`);
 
+  const withLoader = async (action: () => Promise<void>) => {
+    setAwaitingConfirmation(true);
+    await action();
+    setAwaitingConfirmation(false);
+  }
+
   return account ? (
-    <MetamaskContext.Provider value={account}>
+    <MetamaskContext.Provider value={{account, awaitingConfirmation, withLoader}}>
       { children }
     </MetamaskContext.Provider>
   ) : (

@@ -12,7 +12,7 @@ import BackButton from './backButton';
 function Owner() {
 
   const [allContracts, setAllContracts] = useState<ContractData[]>([]);
-  const account = useContext(MetamaskContext);
+  const { account } = useContext(MetamaskContext);
 
 
   const getContracts = async () => {

@@ -16,32 +16,31 @@ export interface ContractData {
   balance: number;
 }
 
-const resetTimer = async (account: any, address: string) => {
+const resetTimer = async (account: any, withLoader: (action: () => Promise<void>) => Promise<void>, address: string) => {
   const testament = getTestament(address);
-
-  const result = await testament.methods.resetCountdownTimer().send({
+  
+  console.log('Reseting timer...');
+  const result = await withLoader(() => testament.methods.resetCountdownTimer().send({
     from: account,
     maxPriorityFeePerGas
-  });
-
-  console.log('Reseting timer...');
+  }));
 }
 
 
-const deleteTestament = async (account: any, address: string) => {
+const deleteTestament = async (account: any, withLoader: (action: () => Promise<void>) => Promise<void>, address: string) => {
   const testament = getTestament(address);
   
-  const result = await testament.methods.kill().send({
+  const result = await withLoader(() => testament.methods.kill().send({
     from: account,
     maxPriorityFeePerGas
-  });
+  }));
 
   console.log('Removing testament...');
 } 
 
 export const ContractCard: React.FC<{ contract: ContractData }> = ({ contract }) => {
 
-  const account = useContext(MetamaskContext);
+  const { account, withLoader } = useContext(MetamaskContext);
 
 
   const persentage = Math.max(
@@ -84,7 +83,7 @@ export const ContractCard: React.FC<{ contract: ContractData }> = ({ contract })
                     src="/reset.svg"
                     ref={anchor}
                     className="w-8 cursor-pointer"
-                    onClick={() => resetTimer(account, contract.address)}
+                    onClick={() => resetTimer(account, withLoader, contract.address)}
                   />
                 )} />
                 <WithTooltip title="edit testament" Widget={({ anchor }) => (
@@ -97,7 +96,7 @@ export const ContractCard: React.FC<{ contract: ContractData }> = ({ contract })
                     src="/delete.svg"
                     className="w-8 cursor-pointer"
                     ref={anchor}
-                    onClick={() => deleteTestament(account, contract.address)}
+                    onClick={() => deleteTestament(account, withLoader, contract.address)}
                   />
                 )} />
                 <div id={`tooltip-btn-reset-${contract.address}`} role="tooltip" className="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">Reset timer</div>
