@@ -28,7 +28,13 @@ const MainTemplate: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         <div className="flex sm:items-center justify-center p-4 bg-slate-600">
           <div className="flex flex-col sm:flex-row space-x-6 text-white font-mono">
             <a href="#" className="px-10">source code</a>
-            <a href="#" className="px-10">about Metamask</a>
+            <a href="https://polygon.technology/" target="blank">
+              <div className="flex flex-row justify-items-start gap-2 items-center px-10">
+                built on
+                <img src="/polygon-logo.svg" className="w-8" />
+                Polygon
+              </div>
+            </a>
           </div>
         </div>
       </footer>
