@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BackButton } from './backButton';
+import BackButton from './backButton';
 import MainTemplate from './main-template';
 
 const chapters = [
