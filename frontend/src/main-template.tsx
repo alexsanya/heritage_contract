@@ -18,7 +18,7 @@ const MainTemplate: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           <div className="flex space-x-6 text-white">
             <a href="/docs" className="px-10">Documentation</a>
             <a href={`${chainExplorerUrl}/${factoryAddress}`} target="blank" className="px-10">Explore Contract</a>
-            <a href="#" className="px-10">About Author</a>
+            <a href="/author" className="px-10">About Author</a>
           </div>
         </div>
       </nav>
@@ -29,7 +29,7 @@ const MainTemplate: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         <div className="flex sm:items-center justify-center p-4 bg-slate-600">
           <div className="flex flex-col sm:flex-row space-x-6 text-white font-mono">
             <a
-              href="https://github.com/alexsanya/heritage_contract/tree/support_tokens"
+              href="https://github.com/alexsanya/heritage_contract"
               target="blank"
               className="px-10"
             >
@@ -43,6 +43,7 @@ const MainTemplate: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 Polygon
               </div>
             </a>
+            <a href="https://ud.me/kovalas.wallet" target="blank">support author</a>
           </div>
         </div>
       </footer>
