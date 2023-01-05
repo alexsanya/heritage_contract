@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { MetamaskContext } from "./ConnectWallet";
+import { chainExplorerUrl, factoryAddress } from "./config";
 
 const MainTemplate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { awaitingConfirmation, label } = useContext(MetamaskContext);
@@ -15,8 +16,8 @@ const MainTemplate: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       <nav className="sticky top-0 z-50 container p-4 bg-slate-800 max-w-full">
         <div className="flex items-center justify-center">
           <div className="flex space-x-6 text-white">
-            <a href="#" className="px-10">Documentation</a>
-            <a href="#" className="px-10">Explore Contract</a>
+            <a href="/docs" className="px-10">Documentation</a>
+            <a href={`${chainExplorerUrl}/${factoryAddress}`} target="blank" className="px-10">Explore Contract</a>
             <a href="#" className="px-10">About Author</a>
           </div>
         </div>
@@ -27,7 +28,14 @@ const MainTemplate: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       <footer className="sticky bottom-0 z-50 bg-very-dark-blue">
         <div className="flex sm:items-center justify-center p-4 bg-slate-600">
           <div className="flex flex-col sm:flex-row space-x-6 text-white font-mono">
-            <a href="#" className="px-10">source code</a>
+            <a
+              href="https://github.com/alexsanya/heritage_contract/tree/support_tokens"
+              target="blank"
+              className="px-10"
+            >
+              source code
+            </a>
+            <a href="mailto:alexsanyakoval@gmail.com">report a bug</a>
             <a href="https://polygon.technology/" target="blank">
               <div className="flex flex-row justify-items-start gap-2 items-center px-10">
                 built on

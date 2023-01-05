@@ -7,6 +7,7 @@ import Successor from './Successor';
 import NewContract from './NewContract';
 import EditContract from './EditContract';
 import MainTemplate from './main-template';
+import DocsPage from './documentation';
 
 import { Metamask } from './metamask';
 
@@ -28,6 +29,7 @@ root.render(
       <BrowserRouter>
         <Routes>
             <Route path="/" element={<App />}></Route>
+            <Route path="/docs" element={<DocsPage />}></Route>
             <Route path="/owner" element={<Owner />}></Route>
             <Route path="/successor" element={<Successor />}></Route>
             <Route path="/newContract" element={<NewContract />}></Route>
