@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BackButton } from './backButton';
 import MainTemplate from './main-template';
 
 const chapters = [
@@ -53,14 +54,15 @@ const VideoNavigation: React.FC<{chapters: IVideoChapter[], onChapterSwitch: (ti
 const DocsPage = () => {
   const [startFrom, setStartFrom] = useState(0);
 
-  return (
-      <div className="flex flex-row items-center justify-center h-full">
-        <VideoNavigation chapters={chapters} onChapterSwitch={time => setStartFrom(time)}/>
-        <div>
-          <Tutorial startFrom={startFrom} />
-        </div>
+  return (<>
+    <BackButton />
+    <div className="flex flex-row items-center justify-center h-full">
+      <VideoNavigation chapters={chapters} onChapterSwitch={time => setStartFrom(time)}/>
+      <div>
+        <Tutorial startFrom={startFrom} />
       </div>
-  );
+    </div>
+  </>);
 }
 
 export default DocsPage;
