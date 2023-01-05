@@ -1,5 +1,4 @@
 import React, { useState, useEffect, createContext } from 'react';
-import MainTemplate from './main-template';
 
 type Props = { children: React.ReactNode };
 
@@ -58,7 +57,6 @@ export const ConnectWallet: React.FC<Props> = ({ children }) => {
       { children }
     </MetamaskContext.Provider>
   ) : (
-    <MainTemplate>
       <div className="flex flex-col items-center justify-center h-full">
         <h1 className="font-xl font-medium">
           Connect your Metamask wallet
@@ -73,7 +71,6 @@ export const ConnectWallet: React.FC<Props> = ({ children }) => {
           </div>
         </div>
       </div>
-    </MainTemplate>
   )
 
 }

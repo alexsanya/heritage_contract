@@ -18,26 +18,23 @@ import {
   Routes,
   Route,
 } from "react-router-dom";
-// import your route components too
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
 root.render(
-  <Metamask>
     <MainTemplate>
       <BrowserRouter>
         <Routes>
-            <Route path="/" element={<App />}></Route>
-            <Route path="/docs" element={<DocsPage />}></Route>
-            <Route path="/author" element={<AuthorPage />}></Route>
-            <Route path="/owner" element={<Owner />}></Route>
-            <Route path="/successor" element={<Successor />}></Route>
-            <Route path="/newContract" element={<NewContract />}></Route>
-            <Route path="/edit-contract/:address" element={<EditContract />}></Route>
+          <Route path="/" element={<App />}></Route>
+          <Route path="/docs" element={<DocsPage />}></Route>
+          <Route path="/author" element={<AuthorPage />}></Route>
+          <Route path="/owner" element={<Metamask><Owner /></Metamask>}></Route>
+          <Route path="/successor" element={<Metamask><Successor /></Metamask>}></Route>
+          <Route path="/newContract" element={<Metamask><NewContract /></Metamask>}></Route>
+          <Route path="/edit-contract/:address" element={<Metamask><EditContract /></Metamask>}></Route>
         </Routes>
       </BrowserRouter>
     </MainTemplate>
-  </Metamask>
 );
