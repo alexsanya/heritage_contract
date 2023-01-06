@@ -2,7 +2,7 @@ import BackButton from './backButton';
 
 const NetworksPanel = () => {
   return (
-    <div className="flex flex-row items-center justify-between w-1/4">
+    <div className="flex flex-row items-center justify-between w-full md:w-1/4 gap-3 md:gap-0">
       <a href="https://www.linkedin.com/in/kovalas/" target="blank">
         <img src="/linkedin.svg" className="w-10" />
       </a>
