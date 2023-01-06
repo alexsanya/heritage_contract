@@ -24,17 +24,15 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-    <MainTemplate>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<App />}></Route>
-          <Route path="/docs" element={<DocsPage />}></Route>
-          <Route path="/author" element={<AuthorPage />}></Route>
-          <Route path="/owner" element={<Metamask><Owner /></Metamask>}></Route>
-          <Route path="/successor" element={<Metamask><Successor /></Metamask>}></Route>
-          <Route path="/newContract" element={<Metamask><NewContract /></Metamask>}></Route>
-          <Route path="/edit-contract/:address" element={<Metamask><EditContract /></Metamask>}></Route>
+          <Route path="/" element={<MainTemplate><App /></MainTemplate>}></Route>
+          <Route path="/docs" element={<MainTemplate><DocsPage /></MainTemplate>}></Route>
+          <Route path="/author" element={<MainTemplate><AuthorPage /></MainTemplate>}></Route>
+          <Route path="/owner" element={<Metamask><MainTemplate><Owner /></MainTemplate></Metamask>}></Route>
+          <Route path="/successor" element={<Metamask><MainTemplate><Successor /></MainTemplate></Metamask>}></Route>
+          <Route path="/newContract" element={<Metamask><MainTemplate><NewContract /></MainTemplate></Metamask>}></Route>
+          <Route path="/edit-contract/:address" element={<Metamask><MainTemplate><EditContract /></MainTemplate></Metamask>}></Route>
         </Routes>
       </BrowserRouter>
-    </MainTemplate>
 );

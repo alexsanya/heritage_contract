@@ -14,7 +14,8 @@ interface IValueEditProps {
   commit: string;
   cancel: string;
   placeholder: string;
-  initial: number;
+  initial: string | number;
+  showValue?: boolean,
   onShow?: () => void;
   onCommit: (value: number | string) => void;
   Trigger: React.FC<{ onClick: () => void }>
@@ -48,16 +49,19 @@ export const UserInputs: React.FC<IUserInputs> = ({ shown, onValueChange, commit
   );
 }
 
-export const ValueEdit: React.FC<IValueEditProps> = ({ commit, cancel, initial, onCommit, placeholder, onShow, Trigger }) => {
+export const ValueEdit: React.FC<IValueEditProps> = ({ commit, cancel, initial, showValue, onCommit, placeholder, onShow, Trigger }) => {
   const [shown, setShown] = useState(false);
+  const [value, setValue] = useState(initial);
 
   const onValueChange = (value: string | number) => {
     onCommit(value);
+    setValue(value);
     setShown(false);
   };
 
   return (
     <div className="flex flex-row px-1 mx-1 items-center">
+      { showValue && !shown && <div>{value}</div> }
       <div className = {(shown ? 'invisible' : '')}>
         <Trigger onClick={() => {setShown(true); onShow && onShow();}}/>
       </div>

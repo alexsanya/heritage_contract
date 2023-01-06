@@ -24,10 +24,8 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove
     onChange(name, newValue as number, newLimit);
   };
 
-  const getSuccessorsList = () => {
+  const getSuccessorsSliders = () => {
     return successorsNames.map(name => (
-      <div className="flex flex-row px-1 m-3 gap-4 items-center">
-        <div className="flex-none">{ name }</div>
         <input
           type="range"
           min={0}
@@ -37,9 +35,14 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove
           disabled={ name === absorber }
           className="slider"
         />
-      </div>
 
     ));
+  }
+
+  const getSuccessorsNames = () => {
+    return successorsNames.map(name => (
+      <div className="flex-none">{ `${name} (${successors[name].share}%)` }</div>
+    ))
   }
 
   const getSuccessorsLimits = () => {
@@ -61,26 +64,36 @@ export const SuccessorsList: React.FC<Props> = ({ successors, onChange, onRemove
 
   return (
     <div className="flex flex-row items-center italic">
-      <div className="grow">
-        {getSuccessorsList()}
+      <div className="flex-none flex flex-col items-conter gap-y-3 mr-1">
+        {getSuccessorsNames()}
       </div>
-      <div className="text-right flex-none flex flex-col gap-y-3 mr-1">
-        {getSuccessorsLimits()}
+      <div className="grow flex flex-col gap-y-5 my-2 pr-4">
+        {getSuccessorsSliders()}
       </div>
       <div className="flex flex-none flex-col gap-y-1 max-w-xs">
         {successorsNames.map(name => {
-          return <div className="flex flex-row">
+          return <div className="flex flex-row content-end items-end self-end">
             <ValueEdit
               initial={successors[name].limit}
               commit="Set"
               cancel="Cancel"
               placeholder="amount"
+              showValue={true}
               onCommit={value => handleChange(name, successors[name].share, +value)}
               Trigger={EditButton}
             />
           </div>
       })
       }
+      </div>
+      <div className="flex flex-none flex-col gap-y-1 max-w-xs">
+        {(successorsNames.length > 1) && successorsNames.map((name) => {
+          return <img
+            src="/delete.svg"
+            className="w-8 cursor-pointer rounded-lg drop-shadow-md bg-slate-200 p-1 my-2"
+            onClick={() => onRemove(name)}
+          />
+        })}
       </div>
     </div>
   );
