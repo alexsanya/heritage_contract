@@ -17,10 +17,6 @@ export const Metamask: React.FC<Props> = ({ children }) => {
       if (ethProvider) {
         setProvider(ethProvider);
       }
-      await ethProvider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId }],
-      });
 
     })
   }, []);
